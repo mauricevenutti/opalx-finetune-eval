@@ -64,6 +64,7 @@ dialog input[type=text] { width:100%; }
 dialog textarea { min-height:100px; }
 .err { color:var(--no); font-size:13px; min-height:1.2em; }
 .sync.good { color:var(--yes); } .sync.bad { color:var(--no); }
+#sendall.pending { background:var(--accent); border-color:var(--accent); color:#fff; font-weight:600; }
 </style>
 </head>
 <body>
@@ -83,7 +84,7 @@ dialog textarea { min-height:100px; }
   <span class="stats" id="stats"></span>
   <button id="who" title="Change the reviewer name"></button>
   <span class="stats sync" id="sync"></span>
-  <button id="sendall" title="Send all your annotations on this page again">Send all</button>
+  <button id="sendall" title="Send your changes on this page to the feedback sheet">Send feedback</button>
   <button id="dljson" title="All annotations and failure categories as JSON (can be imported again)">Export JSON</button>
   <button id="dltxt" title="Readable text file of all annotated questions">Export TXT</button>
   <button id="imp" title="Load a JSON export (merges into the current annotations)">Import JSON</button>
@@ -174,6 +175,7 @@ function catsKey() { return "viewer3:cats:" + evaluator; }
 function saveCats() { store(catsKey(), cats); markCatsDirty(); }
 
 function loadState() {
+  loadDirty();
   notes = load(notesKey(), null);
   cats = load(catsKey(), null);
   // The first reviewer of a page takes over what older viewer versions stored without a name.
@@ -202,15 +204,24 @@ function loadState() {
 }
 
 // ---- sync to the feedback sheet ----
-// Changes are collected per question and sent after a short pause. Unsent messages wait in
-// localStorage (survive reload and offline) and are retried. The newest message per key wins.
+// Changed questions are remembered (per page and reviewer, survive a reload) and only sent when the
+// reviewer presses "Send feedback". Messages that failed to send wait in the queue for the next press.
+// The newest message per key wins.
 const QKEY = "viewer3:queue";
 let queue = load(QKEY, []);
 const dirty = new Set();
-let catsDirty = false, timer = null, sending = false, lastError = "";
-function markDirty(id) { if (!ONLINE) return; dirty.add(id); schedule(); }
-function markCatsDirty() { if (!ONLINE) return; catsDirty = true; schedule(); }
-function schedule() { clearTimeout(timer); timer = setTimeout(flush, 1500); showSync(); }
+let catsDirty = false, sending = false, lastError = "";
+function dirtyKey() { return "viewer3:dirty:" + PAGE + ":" + evaluator; }
+function saveDirty() { store(dirtyKey(), { ids: [...dirty], cats: catsDirty }); }
+function loadDirty() {
+  const x = load(dirtyKey(), {});
+  dirty.clear();
+  for (const id of x.ids || []) dirty.add(id);
+  catsDirty = !!x.cats;
+}
+function markDirty(id) { if (!ONLINE) return; dirty.add(id); saveDirty(); showSync(); }
+function markCatsDirty() { if (!ONLINE) return; catsDirty = true; saveDirty(); showSync(); }
+function pending() { return queue.length + dirty.size + (catsDirty ? 1 : 0); }
 function itemData(id) {
   const n = notes[id]; if (!n) return null;
   return {
@@ -231,9 +242,9 @@ function materialize() {
   dirty.clear();
   if (catsDirty) { enqueue("categories", "", cats.map(c => ({ name: c.name, description: c.description }))); catsDirty = false; }
   store(QKEY, queue);
+  saveDirty();
 }
 async function flush() {
-  clearTimeout(timer); timer = null;
   materialize();
   if (!ONLINE || sending || !queue.length) { showSync(); return; }
   sending = true; showSync();
@@ -252,30 +263,27 @@ async function flush() {
     lastError = String(e && e.message || e);
   }
   sending = false;
-  if (lastError) { showSync(); timer = setTimeout(flush, 20000); }
+  if (lastError) showSync();
   else if (queue.length) flush();
   else showSync();
 }
 function showSync() {
   $("sendall").hidden = !ONLINE;
   if (!ONLINE) { $("sync").textContent = "annotations stay in this browser (export to keep them)"; $("sync").className = "stats sync"; return; }
-  const pend = queue.length + dirty.size + (catsDirty ? 1 : 0);
+  const pend = pending();
   let t, cls = "";
   if (!evaluator) t = "enter your name to send";
   else if (sending) t = "sending…";
-  else if (lastError) { t = pend + " not sent yet, retrying (" + lastError + ")"; cls = "bad"; }
-  else if (pend) t = pend + " changes waiting";
+  else if (lastError) { t = "sending failed (" + lastError + "), press Send feedback again"; cls = "bad"; }
+  else if (pend) t = pend + " unsent " + (pend === 1 ? "change" : "changes");
   else { t = "all sent ✓"; cls = "good"; }
   $("sync").textContent = t;
   $("sync").className = "stats sync " + cls;
+  $("sendall").classList.toggle("pending", !!pend && !sending);
+  $("sendall").disabled = sending || !evaluator;
 }
-window.addEventListener("online", flush);
-document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden") flush(); });
-window.addEventListener("pagehide", () => {
-  materialize();
-  // Best effort on close; the messages stay queued and are sent again on the next visit (newest wins).
-  if (ONLINE && queue.length && navigator.sendBeacon)
-    navigator.sendBeacon(D.endpoint, new Blob([JSON.stringify({ messages: queue.slice(0, 100) })], { type: "text/plain;charset=utf-8" }));
+window.addEventListener("beforeunload", e => {
+  if (ONLINE && evaluator && pending()) { e.preventDefault(); e.returnValue = ""; }  // browser asks before leaving
 });
 
 // ---- reviewer name ----
@@ -299,7 +307,6 @@ $("nameform").onsubmit = e => {
   if (!name) { $("nameerr").textContent = "Please enter your name."; return; }
   $("namedlg").close();
   if (name === evaluator) return;
-  materialize();  // pending changes keep the old name
   const wasAnon = !evaluator, oldNotes = notes, oldCats = cats;
   evaluator = name;
   if (wasAnon && !ONLINE) {  // annotations made before a name was set move to that name
@@ -307,12 +314,15 @@ $("nameform").onsubmit = e => {
     if (load(catsKey(), null) === null) store(catsKey(), oldCats);
   }
   store("viewer3:evaluator", name);
-  loadState(); showWho(); fillFailFilter(); applyFilters(); flush();
+  loadState(); showWho(); fillFailFilter(); applyFilters(); showSync();
 };
 $("who").onclick = openNameDialog;
 $("sendall").onclick = () => {
-  for (const id of Object.keys(notes)) dirty.add(id);
-  catsDirty = true;
+  if (!pending()) {
+    if (!confirm("Everything is sent already. Send all your annotations on this page again?")) return;
+    for (const id of Object.keys(notes)) dirty.add(id);
+    catsDirty = true;
+  }
   flush();
 };
 
@@ -702,7 +712,7 @@ else loadState();
 showWho();
 fillFailFilter();
 applyFilters();
-flush();
+showSync();
 </script>
 </body>
 </html>
