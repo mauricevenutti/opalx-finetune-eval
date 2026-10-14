@@ -713,6 +713,21 @@ showWho();
 fillFailFilter();
 applyFilters();
 showSync();
+
+// Deep link: #q=<question id> opens that question (clears the filters if they hide it).
+function jumpToHash() {
+  const m = location.hash.match(/^#q=(.+)$/);
+  if (!m) return;
+  const idx = D.items.findIndex(i => i.id === decodeURIComponent(m[1]));
+  if (idx < 0) return;
+  if (!view.includes(idx)) {
+    for (const f of ["fcat", "fdefer", "fkeep", "fjudge", "ffail", "fcomm", "fsearch"]) $(f).value = "";
+    applyFilters();
+  }
+  cur = view.indexOf(idx); render(); window.scrollTo(0, 0);
+}
+window.addEventListener("hashchange", jumpToHash);
+jumpToHash();
 </script>
 </body>
 </html>
