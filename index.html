@@ -3,39 +3,32 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>OPALX fine-tune review</title>
+<title>OPALX fine-tune evaluation</title>
 <style>
-:root { --bg:#fafafa; --fg:#1b1b1b; --muted:#666; --card:#fff; --border:#d8d8d8; --accent:#2a5bd7; }
-@media (prefers-color-scheme: dark) {
-  :root { --bg:#16181c; --fg:#e6e6e6; --muted:#9aa0a6; --card:#1f2228; --border:#3a3f47; --accent:#7aa2ff; }
-}
-body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.5 system-ui, sans-serif; }
-main { max-width:800px; margin:0 auto; padding:24px 16px; }
-h1 { font-size:20px; margin:0 0 4px; }
-h2 { font-size:16px; margin:28px 0 4px; }
-p { color:var(--muted); margin:0 0 16px; }
-a.page { display:block; background:var(--card); border:1px solid var(--border); border-radius:8px; padding:10px 14px;
-  margin-bottom:8px; color:var(--fg); text-decoration:none; }
-a.page:hover { border-color:var(--accent); }
-a.page span { color:var(--muted); font-size:13px; }
+:root { color-scheme:light; --fg:#1f1f1f; --muted:#5f5f5f; --rule:#1f1f1f; --hair:#d4d4d4; --link:#1d4f91; }
+body { margin:0; background:#fff; color:var(--fg); font:16px/1.55 Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif; }
+main { max-width:860px; margin:0 auto; padding:40px 16px 64px; }
+h1 { font-weight:normal; font-size:28px; margin:0 0 4px; letter-spacing:.01em; }
+.sub { color:var(--muted); font-style:italic; margin:0 0 28px; }
+table { border-collapse:collapse; width:100%; border-top:1.5px solid var(--rule); border-bottom:1.5px solid var(--rule); }
+th { font-variant:small-caps; letter-spacing:.04em; font-weight:normal; text-align:left; color:var(--muted); border-bottom:.75px solid var(--rule); padding:6px 10px; }
+td { padding:8px 10px; border-bottom:1px solid var(--hair); vertical-align:top; }
+tr:last-child td { border-bottom:none; }
+a { color:var(--link); }
+td.run a { font-size:18px; }
+@media (max-width:600px) { td.desc { display:none; } }
 </style>
 </head>
 <body>
 <main>
-<h1>OPALX fine-tune review</h1>
-<p>Open a page, enter your name, and annotate the questions. Your annotations are sent automatically.</p>
-<a class="page" href="export__run03-1epochs-4B_eval.html">export: run03-1epochs-4B (eval)<br><span>402 questions · export__run03-1epochs-4B_eval.html</span></a>
-<a class="page" href="export__run03-1epochs-4B_manual-eval.html">export: run03-1epochs-4B (manual-eval)<br><span>63 questions · export__run03-1epochs-4B_manual-eval.html</span></a>
-<a class="page" href="export__run03-1epochs-8B_eval.html">export: run03-1epochs-8B (eval)<br><span>402 questions · export__run03-1epochs-8B_eval.html</span></a>
-<a class="page" href="export__run03-1epochs-8B_manual-eval.html">export: run03-1epochs-8B (manual-eval)<br><span>63 questions · export__run03-1epochs-8B_manual-eval.html</span></a>
-<a class="page" href="run02__run02-2epochs_eval.html">run02: run02-2epochs (eval)<br><span>63 questions · run02__run02-2epochs_eval.html</span></a>
-<h2>LLM judge scores</h2>
-<p>Automatic 1-10 scores of the fine-tuned answers. Reviewers: open these only after your own review, so the scores do not bias it.</p>
-<a class="page" href="export__run03-1epochs-4B_eval_judge.html">export: run03-1epochs-4B (eval, first 60 of 402) — LLM judge<br><span>60 questions · export__run03-1epochs-4B_eval_judge.html</span></a>
-<a class="page" href="export__run03-1epochs-4B_manual-eval_judge.html">export: run03-1epochs-4B (manual-eval) — LLM judge<br><span>63 questions · export__run03-1epochs-4B_manual-eval_judge.html</span></a>
-<a class="page" href="export__run03-1epochs-8B_eval_judge.html">export: run03-1epochs-8B (eval, first 60 of 402) — LLM judge<br><span>60 questions · export__run03-1epochs-8B_eval_judge.html</span></a>
-<a class="page" href="export__run03-1epochs-8B_manual-eval_judge.html">export: run03-1epochs-8B (manual-eval) — LLM judge<br><span>63 questions · export__run03-1epochs-8B_manual-eval_judge.html</span></a>
-<a class="page" href="run02__run02-2epochs_eval_judge.html">run02: run02-2epochs (eval) — LLM judge<br><span>63 questions · run02__run02-2epochs_eval_judge.html</span></a>
+<h1>OPALX fine-tune evaluation</h1>
+<p class="sub">One dashboard per training run: judge scores, recognition, forgetting, training curves, and the Error Analysis pages for reviewers.</p>
+<table>
+<thead><tr><th>Run</th><th class="desc">Contents</th><th>Updated</th></tr></thead>
+<tbody>
+<tr><td class="run"><a href="run03/">run03</a></td><td class="desc">Qwen3 4B and 8B LoRA, ~1 epoch on 48,546 rows (16,182 question families) from the OPALX manual</td><td>2026-10-19</td></tr>
+</tbody>
+</table>
 </main>
 </body>
 </html>
