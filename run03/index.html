@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Qwen3 4B and 8B LoRA, ~1 epoch on 48,546 rows (16,182 question families) from the OPALX manual">
+<meta name="description" content="2 adapters (run03-1epochs-4B, run03-1epochs-8B)">
 <meta name="updated" content="2026-10-19">
 <title>run03: OPALX fine-tune dashboard</title>
 <style>
@@ -135,7 +135,7 @@ drops the questions a model without the manual (Sonnet, closed book) could answe
 A large positive &Delta; means the knowledge is in the weights, not only reachable through one prompt format.</p>
 <div id="recbody"></div>
 
-<h2 id="forgetting"><span class="num">4</span>Forgetting: did the model lose general ability?</h2>
+<h2 id="forgetting"><span class="num">4</span>Forgetting</h2>
 <p class="lead">Three standard benchmarks (1000 questions each, zero-shot, scored by log-likelihood like the recognition test):
 <i>HellaSwag</i> (commonsense sentence completion), <i>WinoGrande</i> (pronoun resolution), <i>ARC-Challenge</i> (grade-school science).
 Each adapter is compared with its own base model on the same questions. The forgetting score is the mean over the three tasks;
@@ -347,10 +347,7 @@ function lineChart(el, series, o) {
 // ---------- header + summary ----------
 $("crumbrun").textContent = D.run;
 $("h1").textContent = D.run;
-const ds = D.dataset || {};
-$("sub").textContent = [ds.train != null ? ds.train.toLocaleString("en") + " training rows" : null,
-  ds.eval != null ? ds.eval + " eval" : null, ds.test != null ? ds.test + " test" : null,
-  A.length + " adapter" + (A.length === 1 ? "" : "s"), "updated " + D.updated].filter(Boolean).join(" · ");
+$("sub").textContent = "updated " + D.updated;
 
 function judgeStats(block, certs) {
   const rows = block ? block.rows.filter(r => !certs || certs.includes(r.certainty)) : [];
