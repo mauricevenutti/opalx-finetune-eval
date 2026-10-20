@@ -1,0 +1,2425 @@
+{
+  "page": "run03/run03-1epochs-8B_eval",
+  "evaluators": {
+    "claude opus5.5": {
+      "failure_categories": [
+        {
+          "name": "contradicts the manual",
+          "description": "States the opposite of a documented behavior or rule (e.g. 'rejected' becomes 'ignored', '=' and ':=' swapped, a solver that couples external fields). Use when the claimed fact is inverted, not merely missing. Not for answers that pick the wrong attribute or class: use 'confused entity'."
+        },
+        {
+          "name": "confused entity",
+          "description": "Answers about a neighboring attribute, element, class or beam instead of the one asked (EKINSTOP for TURNS, DX for X, RMIN for SLPTC, daughter instead of parent beam, RBEND/SBEND swapped). The fact may be right for the other entity. Not for names that do not exist at all: use 'hallucinated identifier'."
+        },
+        {
+          "name": "hallucinated identifier",
+          "description": "Uses an attribute, option, class, method signature, file-format column or syntax that does not exist in the manual (REBIN, VARIABLE(...), MAXX, HDF5Plugin, VectorXd parameters, '%' in the expression grammar). Not for real names with a wrong value: use 'wrong value or unit'."
+        },
+        {
+          "name": "wrong value or unit",
+          "description": "A real quantity, default, unit or quoted number is wrong (t in s instead of ns, MAXSTEPS default 1 instead of 10, R16/R26 digits, accepted EMISSIONMODEL values). Not for derived formulas: use 'wrong formula'."
+        },
+        {
+          "name": "wrong formula",
+          "description": "A documented equation is replaced by an invented or garbled one (Boris update, Michel spectrum, sector placement angle, decay condition, RK right-hand side) or applied wrongly. Not for single wrong numbers: use 'wrong value or unit'."
+        },
+        {
+          "name": "invented mechanism",
+          "description": "The explanation of how or why something works is a plausible but undocumented story (generic PIC steps, 'singular eigenvectors', regression maintenance as the reason to use MULTIPOLET). Use when the headline answer is also wrong or there is no yes/no verdict. When the verdict is right and only the reason is invented, use 'right verdict, wrong reason'."
+        },
+        {
+          "name": "right verdict, wrong reason",
+          "description": "The yes/no or diagnostic verdict matches the reference, but the supporting reason, list or numbers are invented, so a user acting on the explanation would be misled. Boundary to 'invented mechanism': here the top-line answer is right."
+        },
+        {
+          "name": "incomplete answer",
+          "description": "Points in the right direction but leaves out the key content the question asks for (formula, second half of a two-part question, the actual layout or condition), so it does not answer the question. Not for answers whose content is wrong: use the specific error category."
+        },
+        {
+          "name": "invalid input deck",
+          "description": "A produced or corrected OPALX input fragment would not parse, refers to undefined objects, still has the reported error, or ignores an explicit constraint of the request (terminator, single statement, required attribute)."
+        },
+        {
+          "name": "self-contradictory answer",
+          "description": "The answer contradicts itself (code block vs text, 'not ignored' then 'reads only the first N', repeating the user's own command as the fix). Use as a secondary category when another error is primary."
+        }
+      ],
+      "items": [
+        {
+          "id": "developer-guide/architecture.qmd#linear-transfer-map-calculation-1::opalx-04935::v1",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Right: the two settings are independent. \"A refinement setting does not carry over from one integrator to another\" is confusingly worded (it does stay unchanged), but the core statement is correct.",
+              "certainty": "medium",
+              "evidence": [
+                "developer-guide/architecture.qmd:58-62"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "developer-guide/architecture.qmd#linear-transfer-map-calculation-1::opalx-16090::v1",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Right: separate settings, changing one does not change the other. Misses that the integrator choice goes to both the reference and private trackers and is gated to design-reference maps; \"R_{L,L}\" and \"RK4 refinement is not the same as BORIS refinement\" are unsupported.",
+              "certainty": "medium",
+              "evidence": [
+                "developer-guide/architecture.qmd:58-64"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "developer-guide/space-charge-solver-architecture.qmd#space-charge-class-architecture-2::opalx-17425::v3",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "hallucinated identifier"
+              ],
+              "comment": "Invents classes (ParticleMeshFieldStorage, CartesianPIC3DFieldComposer) and marks the unconditional members as \"0..1\". Expected: unconditional ownership of CartesianPIC3DFieldStorage, CartesianDomainUpdater, ParticleMeshFieldTransfer, RelativisticFieldComposer, PoissonSolver; PoissonSolver --> FieldStorage (borrows rho and E); RelativisticFieldComposer ..> ParticleMeshFieldTransfer : gathers.",
+              "certainty": "high",
+              "evidence": [
+                "developer-guide/space-charge-solver-architecture.qmd:49-288"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "developer-guide/space-charge-solver-architecture.qmd#space-charge-solver-architecture-0::opalx-13609::v1",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "incomplete answer"
+              ],
+              "comment": "Misses that the diagrams are rendered from editable Mermaid sources and that the links are A3 PDFs. \"Scales diagrams to fit the page\" is invented.",
+              "certainty": "medium",
+              "evidence": [
+                "developer-guide/space-charge-solver-architecture.qmd:15-16"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "getting-started/index.qmd#install-and-build-opalx-0::opalx-03955::v3",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Names the right rule (same host compiler throughout the stack). The fix (go back to GCC 11 everywhere) satisfies that rule but moves away from the recommended GCC 13; the better minimal fix is an OpenMPI built with GCC 13.",
+              "certainty": "medium",
+              "evidence": [
+                "getting-started/index.qmd:14-16"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "physics/beam-beam/index.qmd#sec-beam-beam-architecture-14::opalx-11274::v2",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "right verdict, wrong reason"
+              ],
+              "comment": "Says the benchmark shows agreement \"with the analytic model on the same grid\"; it is a CPU vs A100 comparison of the same model with identical inputs. The second half (not agreement with a different model) is right.",
+              "certainty": "medium",
+              "evidence": [
+                "physics/beam-beam/index.qmd:459-479"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "physics/beam-beam/index.qmd#sec-beam-beam-current-results-13::opalx-16583::v1",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "wrong value or unit"
+              ],
+              "comment": "Spots the flaw (aggregate vs per-species) but invents the positron numbers (\"x = 0.1078 ... s = 0.0170\") and mixes them with the aggregate values. The manual: positrons x 107.90 % (RMSE 5.766 µm), s 0.1019 % (0.881 µm); positron x does not agree.",
+              "certainty": "high",
+              "evidence": [
+                "physics/beam-beam/index.qmd:440-444"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "physics/beam-beam/index.qmd#sec-beam-beam-track12-9::opalx-09758::v1",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "invented mechanism"
+              ],
+              "comment": "Says \"same production boundary conditions\"; the documented requirement is that exact boundary births are handled consistently with the fractional interval Δt_i = t_{n+1} - t_{b,i} integrated for within-step births.",
+              "certainty": "high",
+              "evidence": [
+                "physics/beam-beam/index.qmd:303-308"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "physics/cyclotron.qmd#energy-target-semantics-and-long-run-comparison-3::opalx-02372::v1",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "hallucinated identifier"
+              ],
+              "comment": "Invents RMIN/RMAX/HAPERT/VAPERT and a Fieldmap::get2DField story. The documented answer: explicit old-OPAL PHIMIN=0, PHIMAX=360; the installed 2022.1 parser did not activate the full-azimuth coil when the upper limit was omitted.",
+              "certainty": "high",
+              "evidence": [
+                "physics/cyclotron.qmd:226-229"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "physics/cyclotron.qmd#energy-target-semantics-and-long-run-comparison-3::opalx-16259::v2",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "incomplete answer"
+              ],
+              "comment": "Never places the bunch-clock advance, which is the error being asked about (it must come after computing and retaining the reference's terminal substep). Also says the reference is \"advanced\" rather than its terminal substep computed and retained.",
+              "certainty": "medium",
+              "evidence": [
+                "physics/cyclotron.qmd:189-193"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "physics/cyclotron.qmd#experimental-discrete-rf-tracking-2::opalx-15363::v2",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "right verdict, wrong reason",
+                "wrong value or unit"
+              ],
+              "comment": "Gets α = 0 but for the wrong reason (\"with V=0, sin φ = 0\"); α vanishes because it is proportional to V. Gives df/du units of MV/m (f is a dimensionless multiplier) and misses the useful condition: nonzero V with cos φ = 0 (e.g. φ = π/2) gives focusing without energy gain.",
+              "certainty": "high",
+              "evidence": [
+                "physics/cyclotron.qmd:124-141"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "physics/cyclotron.qmd#final-reference-return-event-1::opalx-02266::v1",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "wrong formula"
+              ],
+              "comment": "Says the condition is r_ref = r_0 and treats τ as a signed path length. The condition only puts the reference on the plane through r_0 normal to n (zero displacement along n); τ is a time in (0, Δt].",
+              "certainty": "high",
+              "evidence": [
+                "physics/cyclotron.qmd:80-87"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "physics/decay-processes/index.qmd#v-a-polarization-of-the-daughter-muon-2::opalx-01769::v3",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "wrong formula",
+                "wrong value or unit"
+              ],
+              "comment": "Every slot is invented (x on [-1,1], f = 2C(1+x), x_min = -1). The manual: x = 2E_e/m_mu on [0,1], f(x) = 2x²(3-2x), x_min = m_e/(m_mu/2) ≈ 9.7e-3, peak at x=1, f_max = 2, rejection sampling.",
+              "certainty": "high",
+              "evidence": [
+                "physics/decay-processes/index.qmd:109-122"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "physics/elements/index.qmd#first-order-fringe-optics-3::opalx-14953::v1",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "incomplete answer"
+              ],
+              "comment": "ψ flips sign (right), but it does not give the result for the vertical angle (E - ψ becomes E + ψ with the original ψ) and the \"sum of two terms with opposite signs\" remark is muddled.",
+              "certainty": "medium",
+              "evidence": [
+                "physics/elements/bend.qmd:113-121"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "physics/elements/index.qmd#sbend-and-rbend-class-structure-7::opalx-09301::v3",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "hallucinated identifier"
+              ],
+              "comment": "Class (OpalBend) right, parameters invented (`const VectorXd& Leff, const VectorXd& F_int`). The diagram shows `deriveAnalyticDipoleCoefficient(Leff, angle)`.",
+              "certainty": "high",
+              "evidence": [
+                "physics/elements/bend.qmd:397"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "physics/elements/index.qmd#sbend-and-rbend-class-structure-7::opalx-10263::v1",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Correct: both hold BMultipoleField field_m; the difference given (base classes) is true, though the reference highlights the geometry members.",
+              "certainty": "high",
+              "evidence": [
+                "physics/elements/bend.qmd:445-449"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "physics/elements/index.qmd#sliced-bend-model-5::opalx-13838::v2",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Correct: ψ2 enters only k_y,exit = -h tan(E2-ψ2); scales with h, h_gap, F_int and the angle factor.",
+              "certainty": "high",
+              "evidence": [
+                "physics/elements/bend.qmd:266-292"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "physics/gamma-gamma/index.qmd#_cain_structure-13::opalx-00977::v1",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "invented mechanism"
+              ],
+              "comment": "Invents three physics layers (geometry, energy mapping, pair kinematics). The manual's layers are input/model selection, runtime driver, event generation.",
+              "certainty": "high",
+              "evidence": [
+                "physics/gamma-gamma/_BreitWheeler.qmd:561-590"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "physics/gamma-gamma/index.qmd#sec-bw-implemented-opalx-benchmark-9::opalx-17875::v2",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Core right: the benchmark has no GPU path, so a GPU build does not change it. \"Fixed seed, a single electron-positron event\" and \"NVIDIA CUDA build for the OPALX benchmark suite\" are invented.",
+              "certainty": "medium",
+              "evidence": [
+                "physics/gamma-gamma/_BreitWheeler.qmd:174-180"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "physics/gamma-gamma/index.qmd#sec-bw-implemented-opalx-benchmark-9::opalx-18188::v2",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Right next step (check CAIN uses σθ = 1 mrad, zero energy spread). Misses the other matching conditions (fixed laser photon, momentum-space sampling only, no transverse position spread or overlap weighting); \"documented CAIN decks use the same values\" is asserted without basis.",
+              "certainty": "medium",
+              "evidence": [
+                "physics/gamma-gamma/_BreitWheeler.qmd:189-198"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "physics/linear-transfer-maps.qmd#closed-orbit-launch-handover-14::opalx-04442::v2",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "contradicts the manual"
+              ],
+              "comment": "Says the frame is computed by OrbitThreader; the manual says the scalar frame construction runs on the host, and the particle kernels keep using the existing local frame and device views. \"Kernels are not involved\" misses that connection.",
+              "certainty": "medium",
+              "evidence": [
+                "physics/linear-transfer-maps.qmd:627-629"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "physics/linear-transfer-maps.qmd#damped-fixed-point-solver-c-interface-11::opalx-12228::v3",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Correct: aborts, no automatic step reduction, choose steps and rerun. \"Applied to all six coordinates\" is wrong (the solver works on four coordinates).",
+              "certainty": "medium",
+              "evidence": [
+                "physics/linear-transfer-maps.qmd:500-502"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "physics/linear-transfer-maps.qmd#field-support-boundary-subdivision-6::opalx-10303::v1",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "invented mechanism"
+              ],
+              "comment": "Calls L_min/(4c) a \"cell count\" normalization and gives no reason. The manual: trial steps are capped at L_min/(4c), L_min = shortest positive support extent or nominal body arc length; the body cap resolves map ownership when support is wider than the body and prevents jumping over a thin field region without a sample.",
+              "certainty": "high",
+              "evidence": [
+                "physics/linear-transfer-maps.qmd:268-276"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "physics/linear-transfer-maps.qmd#first-native-cyclotron-closed-orbit-benchmark-15::opalx-00105::v3",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Correct: global Z=0 section with positive-Z return. The \"not the local RMIN ring return plane\" remark is unsupported filler.",
+              "certainty": "high",
+              "evidence": [
+                "physics/linear-transfer-maps.qmd:665-666"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "physics/linear-transfer-maps.qmd#first-native-cyclotron-closed-orbit-benchmark-15::opalx-02917::v2",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Right: 18 nm is timestep discretization difference, the 1e-10 closure was met, keep the tolerance. The \"reported maximum of 1.0246e-10\" Newton residual is an invented number.",
+              "certainty": "medium",
+              "evidence": [
+                "physics/linear-transfer-maps.qmd:670-675"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "physics/linear-transfer-maps.qmd#map-only-runge-kutta-integration-7::opalx-13689::v3",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "wrong formula"
+              ],
+              "comment": "The fix (add s to the state with ds/dt = c‖u‖/γ) is right, but the \"documented equations\" it restates are wrong: dr/dt = c·u (missing /γ) and du/dt = -qc/(mc²+T)(...) (wrong sign and denominator; the manual uses qc/E0). It also invents s-sensitivities and variational terms not in this section.",
+              "certainty": "medium",
+              "evidence": [
+                "physics/linear-transfer-maps.qmd:306-322"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "physics/linear-transfer-maps.qmd#map-only-runge-kutta-integration-7::opalx-17602::v2",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Core right: DOP853 is fixed-step here, no adaptive controller; reduce DT. The concrete advice is invented (a \"10^-11 DT\" resolution for a \"100 nm\" crossing, SCFIELDUPDATE affecting map DT), but the main guidance stands.",
+              "certainty": "medium",
+              "evidence": [
+                "physics/linear-transfer-maps.qmd:333-339"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "physics/map-3-fringe-dba.qmd#initial-ring-validation-1::opalx-05730::v2",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "wrong value or unit"
+              ],
+              "comment": "Both numbers wrong (R16 = 6.346340692238 m, R26 = 1.343525845901 in the manual); only the \"R16 carries the unit\" part is right.",
+              "certainty": "high",
+              "evidence": [
+                "physics/map-3-fringe-dba.qmd:51-52"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "physics/map-3-fringe-dba.qmd#initial-ring-validation-1::opalx-13390::v3",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "right verdict, wrong reason",
+                "confused entity"
+              ],
+              "comment": "Right that it is not the integration error, but misidentifies the quantity as \"OPALX minus analytic matrix entry\"; it is the printed symplecticity residual max over (MᵀJM-J)_ij. Misses the reasons (noncanonical slopes, final momentum not normal to the reused section).",
+              "certainty": "medium",
+              "evidence": [
+                "physics/map-3-fringe-dba.qmd:56-61"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "physics/map-3-fringe-dba.qmd#initial-ring-validation-1::opalx-16164::v1",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Right verdict (completion, not closure). Replaces the second validated item (separation of geometry from travelled length) with a vacuous \"smoke coverage\".",
+              "certainty": "medium",
+              "evidence": [
+                "physics/map-3-fringe-dba.qmd:65-66"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "physics/map-3-fringe-dba.qmd#initial-ring-validation-1::opalx-18110::v1",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "contradicts the manual"
+              ],
+              "comment": "Says the second check is \"after loading into memory\"; the documented procedure checked the SHA-256 before and after the run.",
+              "certainty": "high",
+              "evidence": [
+                "physics/map-3-fringe-dba.qmd:62-63"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "physics/map-3-fringe-dba.qmd#map3-cas-edge-8::opalx-08836::v2",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Core right: k_x = h tan E, zero at E = 0; FINT acts only via ψ in k_y (R43). Drops the minus sign in k_y and the last sentence (\"the horizontal block is R21 = k_x and R43 = k_y\") is garbled, but the explanation holds.",
+              "certainty": "medium",
+              "evidence": [
+                "physics/map-3-fringe-dba.qmd:316-325"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "physics/map-3-fringe-dba.qmd#map3-cas-edge-8::opalx-11143::v2",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "right verdict, wrong reason",
+                "wrong formula"
+              ],
+              "comment": "Invents formulas (k_x = 2·HGAP·FINT) and numbers (ΔR16 = -0.6025 mm, R26 = -0.2287). The documented argument: at E = 0, k_x = 0 and the FINT correction only enters k_y (R43, vertical block), so it cannot cause ΔR16 ≈ -0.0471 m / ΔR26 ≈ -0.0399; distributed bending and the reference orbit differ.",
+              "certainty": "high",
+              "evidence": [
+                "physics/map-3-fringe-dba.qmd:364-374"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "physics/map-3-fringe-dba.qmd#map3-components-5::opalx-18282::v3",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Diagnosis and corrected k_y ≈ 1.0e-3 m^-1 are right. It misstates ψ (adds a factor ℓ_entry; the chunk gives ψ = h·HGAP·FINT) and quotes invented \"documented values\" (ΔB_x = 0.0002499987 m^-1 with wrong units).",
+              "certainty": "medium",
+              "evidence": [
+                "physics/map-3-fringe-dba.qmd:172-178"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "physics/map-3-fringe-dba.qmd#map3-integral-6::opalx-00539::v2",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "wrong formula",
+                "wrong value or unit"
+              ],
+              "comment": "Invents a formula (L_eff = L_ref + (ℓ_entry+ℓ_exit)/2) and value 2 m. The manual: L_eff = ∫_{-w}^{L_b+w} A(z) dz = 1.047200488015433 m.",
+              "certainty": "high",
+              "evidence": [
+                "physics/map-3-fringe-dba.qmd:216-222"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "physics/map-3-fringe-dba.qmd#map3-opalx-runs-7::opalx-09967::v1",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Right handling: threshold unchanged at 1e-6, RK4 slightly above, report it and do not loosen. The \"documented reason ... magnitude-modulus error\" is invented.",
+              "certainty": "medium",
+              "evidence": [
+                "physics/map-3-fringe-dba.qmd:245-307"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "physics/map-3-fringe-dba.qmd#map3-reference-comparison-9::opalx-01993::v1",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Right core: the Python checks validate the independent reference and cannot change OPALX output; compare ΔM = M_OPALX - M_ref directly. \"Its only connection to OPALX is the shared Lorentz Jacobian\" is wrong (the reference uses no OPALX calls), and pointing to compare_reference.py (the CERN thin-edge comparison script) is questionable.",
+              "certainty": "medium",
+              "evidence": [
+                "physics/map-3-fringe-dba.qmd:398-400"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "physics/map-3-fringe-dba.qmd#map3-reference-comparison-9::opalx-04704::v2",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Correct: tolerances only affect the independent reference tests, which use no OPALX calls; compare ΔM directly.",
+              "certainty": "high",
+              "evidence": [
+                "physics/map-3-fringe-dba.qmd:398-400"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "physics/map-3-fringe-dba.qmd#map3-reference-comparison-9::opalx-19928::v2",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "wrong value or unit",
+                "wrong formula"
+              ],
+              "comment": "Formula right, but calls α \"dimensionless\" (it is in (T m)^-1), says q/e is in SI units, and invents equations (dT/dℓ = α n×B, dS/dℓ = ...). The manual: dk/dℓ = α n×B(r).",
+              "certainty": "high",
+              "evidence": [
+                "physics/map-3-fringe-dba.qmd:386-393"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "physics/overview/index.qmd#passive-ring-probes-6::opalx-01917::v3",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Correct diagnosis and fix (one fixed lab-frame plane for both endpoints). The appended \"other requirements\" are garbled (\"strictly decreasing positive-momentum crossings\"; the manual rejects strictly decreasing timestamps), but they do not change the fix.",
+              "certainty": "medium",
+              "evidence": [
+                "physics/overview/index.qmd:286-305"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "physics/overview/index.qmd#sec-0::opalx-08640::v1",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "incomplete answer"
+              ],
+              "comment": "Only restates \"useful for large aspect ratio\"; the benefit asked for (efficient and accurate treatment) is not given.",
+              "certainty": "medium",
+              "evidence": [
+                "physics/overview/index.qmd:20-23"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "physics/overview/index.qmd#sec-11::opalx-11904::v3",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "incomplete answer"
+              ],
+              "comment": "Says \"positions of the LINE elements\". The manual: bend angle and chord length of the dipoles plus the element positions along the trajectory.",
+              "certainty": "high",
+              "evidence": [
+                "physics/overview/index.qmd:533-535"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "reference/configuration.qmd#ippl-settings-managed-by-opalx-4::opalx-18295::v1",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Correct: controls IPPL's own tests, set OFF by OPALX.",
+              "certainty": "high",
+              "evidence": [
+                "reference/configuration.qmd:100-108"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "reference/configuration.qmd#opalx-feature-flags-1::opalx-12891::v1",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Correct: separate build directory with OPALX_ENABLE_COVERAGE=ON and OPALX_ENABLE_UNIT_TESTS=ON; production keeps coverage OFF. Does not mention the GNU/Clang requirement.",
+              "certainty": "high",
+              "evidence": [
+                "reference/configuration.qmd:50-53"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "reference/configuration.qmd#opalx-feature-flags-1::opalx-13620::v3",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Main point right: SKIP_FAILING_TESTS excludes failing tests, so the pass is not proof; reconfigure with OFF. \"It also does not guarantee that the other tests all pass\" is confused (they did pass), and integration tests are not mentioned.",
+              "certainty": "medium",
+              "evidence": [
+                "reference/configuration.qmd:59"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "reference/file-formats.qmd#checkpoint-restart-3::opalx-08002::v1",
+          "keep": false,
+          "keep_reason": "Reference contradicts itself: it opens with \"No.\" to \"are checkpoints still written?\" and then says they are still written. The body matches the manual (CHECKPOINTFREQ is independent of PSDUMPFREQ and ENABLEHDF5), the leading \"No\" is wrong; fix the reference before reuse.",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Correct: checkpoints are still written; CHECKPOINTFREQ is independent of PSDUMPFREQ and ENABLEHDF5.",
+              "certainty": "high",
+              "evidence": [
+                "user-guide/options.qmd:73",
+                "reference/file-formats.qmd:120-124"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "resources/presentations-reports.qmd#presentations-and-reports-0::opalx-04019::v1",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Correct: link the catalog entry to the detail page, keep the PDF link there.",
+              "certainty": "high",
+              "evidence": [
+                "resources/presentations-reports.qmd:11-14"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "resources/presentations-reports.qmd#presentations-and-reports-0::opalx-08451::v1",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Right fix (remove the _quarto.yml entry). Does not explain that the report archive renders detail pages separately, which the question asked for.",
+              "certainty": "medium",
+              "evidence": [
+                "resources/presentations-reports.qmd:28-30"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "resources/reports/2026/cuda-extended-lambda-linkage-bug.qmd#cuda-extended-lambda-linkage-bug-0::opalx-09789::v3",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Core is right (NVCC bug confirmed, workaround implemented). But \"implemented in IPPL pull request #561\" is a wrong attribution: #561 is the separate implicit-this capture report in the catalog.",
+              "certainty": "medium",
+              "evidence": [
+                "resources/reports/2026/cuda-extended-lambda-linkage-bug.qmd:12-14",
+                "resources/presentations-reports.qmd:20-21"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "resources/reports/2026/ippl-implicit-this-capture.qmd#the-companion-expression-object-bug-4::opalx-11950::v2",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Correct: #561 covered BareField, ParticleAttrib and FEMVector.",
+              "certainty": "high",
+              "evidence": [
+                "resources/reports/2026/ippl-implicit-this-capture.qmd:145-148"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "resources/reports/2026/ippl-implicit-this-capture.qmd#why-copying-barefield-was-unsafe-2::opalx-10847::v1",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "confused entity",
+                "incomplete answer"
+              ],
+              "comment": "Names the raw layout pointer but attaches it to the view handle; the manual says BareField combines the view handle with host-side bookkeeping, which includes the raw layout pointer. The \"kind of state\" (host-side bookkeeping) is missing.",
+              "certainty": "medium",
+              "evidence": [
+                "resources/reports/2026/ippl-implicit-this-capture.qmd:65-66"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/appendix/autophase/index.qmd#refinement-by-direct-tracking-6::opalx-11358::v2",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "incomplete answer"
+              ],
+              "comment": "Prerequisite (initial guess) is right, but it skips what is decided before the refinement rounds: one-sided bracketing from dphi = π/360 to find the uphill direction. The claim that the initial guess comes from tracking the reference particle is not what this section says.",
+              "certainty": "medium",
+              "evidence": [
+                "user-guide/appendix/autophase/index.qmd:248-254"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/appendix/autophase/index.qmd#search-strategy-5::opalx-19240::v2",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "hallucinated identifier"
+              ],
+              "comment": "Does not name the parameters (R and P) and drops the template arguments: the type is `const Vector_t<double, 3>&`.",
+              "certainty": "medium",
+              "evidence": [
+                "user-guide/appendix/autophase/index.qmd:211-214"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/appendix/field-maps/index.qmd#opalx-field-maps-0::opalx-11189::v3",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "hallucinated identifier"
+              ],
+              "comment": "Invents \"x and y columns\" and an `HDF5Plugin` reader. The manual: header with XZ/ZX ordering, grid extents and spacing counts; samples (Bz, Br) or (Br, Bz); bilinear interpolation; on-axis field normalized to 1 T unless disabled.",
+              "certainty": "high",
+              "evidence": [
+                "user-guide/appendix/field-maps/index.qmd:30-35"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/appendix/language-syntax/index.qmd#real-array-expressions-and-definitions-2::opalx-05809::v3",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "invalid input deck"
+              ],
+              "comment": "Expression is right, but the question asked for no statement terminator and the answer adds a semicolon. The cited \"documented example\" `REAL VECTOR A = {1, 2, 3};` is not in this chunk.",
+              "certainty": "medium",
+              "evidence": [
+                "user-guide/appendix/language-syntax/index.qmd:154-157"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/appendix/opal-madx/index.qmd#equivalent-explicit-formulas-2::opalx-02312::v3",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Correct: length missing, ELEMEDGE = c - l/2, asks for l.",
+              "certainty": "high",
+              "evidence": [
+                "user-guide/appendix/opal-madx/index.qmd:103-107"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/beam-distributions.qmd#emissionsource-1::opalx-15406::v3",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "right verdict, wrong reason"
+              ],
+              "comment": "Correct core diagnosis (T0 in seconds, so 10 s, convert to 1e-11). But it invents restrictions (\"T0 only an offset for ANGULAR sources\", \"ignored for EMITTEDFROMFILE\") and sends the user to check file headers, which is misleading.",
+              "certainty": "medium",
+              "evidence": [
+                "user-guide/beam-distributions.qmd:42"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/beam-distributions.qmd#fromfile-8::opalx-05598::v1",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "self-contradictory answer"
+              ],
+              "comment": "Contradicts itself: first says extra rows are not silently ignored and the count must match exactly, then calls the count an \"upper limit\" and says OPALX reads only the declared rows (which is silently ignoring them). Misses the NPARTDIST way to use a prefix.",
+              "certainty": "medium",
+              "evidence": [
+                "user-guide/beam-distributions.qmd:278-289"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/beam-distributions.qmd#fromfile-8::opalx-11698::v2",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Correct: NPARTDIST=500, first 500 records, file keeps exactly 2000 rows.",
+              "certainty": "high",
+              "evidence": [
+                "user-guide/beam-distributions.qmd:278-279"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/beam-distributions.qmd#gauss-4::opalx-18359::v1",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Correct verdict (bound not guaranteed). Thin: does not explain that truncation precedes the zero-mean translation, so shifting by a nonzero sample mean can move points past ±3σ.",
+              "certainty": "medium",
+              "evidence": [
+                "user-guide/beam-distributions.qmd:136-138"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/beam-distributions.qmd#multivariategauss-5::opalx-03194::v2",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Correct: R0*, P0*, T0; EMISSIONMODEL=NONE only.",
+              "certainty": "high",
+              "evidence": [
+                "user-guide/beam-distributions.qmd:178-181"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/beam-distributions.qmd#multivariategauss-5::opalx-07682::v3",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "contradicts the manual",
+                "wrong value or unit"
+              ],
+              "comment": "Adds ASTRA; MULTIVARIATEGAUSS supports EMISSIONMODEL=NONE only.",
+              "certainty": "high",
+              "evidence": [
+                "user-guide/beam-distributions.qmd:180"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/beam-lines/index.qmd#ring-geometry-fringes-1::opalx-16650::v2",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "confused entity"
+              ],
+              "comment": "Nesting, contents and tagging are right, but the unsupported modifiers are wrong: RING does not support repetition and reflection modifiers; ELEMEDGE/CIRCUMFERENCE are other restrictions.",
+              "certainty": "medium",
+              "evidence": [
+                "user-guide/beam-lines/index.qmd:88-93"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/beam.qmd#beam-definitions-0::opalx-04079::v2",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Correct fragment with POLARIZATION={0,0,0}. Justification is slightly off (the point is that setting it, even to zero, enables spin storage), but the deck is right.",
+              "certainty": "high",
+              "evidence": [
+                "user-guide/beam.qmd:36"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/beam.qmd#multiple-species-decay-and-spin-1::opalx-17622::v2",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "confused entity"
+              ],
+              "comment": "Identifies the BCHARGE = NALLOC·abs(CHARGE)·q_e rule, but applies the change to the wrong beam: it says the daughter's BCHARGE must be doubled, while it is the parent pion beam whose NALLOC changed and whose BCHARGE must go to 10000·abs(CHARGE)·q_e.",
+              "certainty": "high",
+              "evidence": [
+                "user-guide/beam.qmd:72-73"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/beam.qmd#multiple-species-decay-and-spin-1::opalx-17657::v2",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Correct fix (use abs(CHARGE), BCHARGE = 3000·q_e). The intermediate \"R = +1 for mu+, -1 for mu-\" contradicts the R = abs(CHARGE) it then states; misses the POLARIZATION reminder.",
+              "certainty": "medium",
+              "evidence": [
+                "user-guide/beam.qmd:72-75"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/command-format/index.qmd#command-format-0::opalx-02878::v3",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "invalid input deck"
+              ],
+              "comment": "Splits one element into two separate definitions of QF (the second redefines the first), so the meaning changes. Expected a single statement across three lines.",
+              "certainty": "high",
+              "evidence": [
+                "user-guide/command-format/index.qmd:18-23"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/command-format/index.qmd#logical-expressions-1::opalx-01344::v2",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "invalid input deck"
+              ],
+              "comment": "Changes && to OR (||) and keeps both strict inequalities. Expected `X>=10 && Y<=20 OR Z==15` (with the original || operator).",
+              "certainty": "high",
+              "evidence": [
+                "user-guide/command-format/index.qmd:127-131"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/command-format/index.qmd#real-expressions-2::opalx-01062::v3",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "hallucinated identifier",
+                "wrong formula"
+              ],
+              "comment": "Invents grammar rules (`real-expr-atom`, `%` modulo, `#expr#`), drops `^` and the factor/term layers, and gets precedence wrong. The manual: primary → factor (^) → term (*, /) → real-expr (+, -, unary).",
+              "certainty": "high",
+              "evidence": [
+                "user-guide/command-format/index.qmd:165-183"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/command-format/index.qmd#real-functions-3::opalx-16586::v2",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "wrong formula",
+                "invalid input deck"
+              ],
+              "comment": "Hard-codes invented numbers and a nonsense formula, with `**` exponent syntax. The predefined constants are meant: REAL MRATIO=PMASS/EMASS; REAL MALPHA=ALPHAMASS;",
+              "certainty": "high",
+              "evidence": [
+                "user-guide/command-format/index.qmd:240-244"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/cyclotron.qmd#cyclotron-closed-orbit-finder-3::opalx-15484::v3",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Right: larger bound on the return search, no guarantee of finding an orbit. \"Units of the selected section coordinate\" is wrong (MAXPATH is in metres).",
+              "certainty": "medium",
+              "evidence": [
+                "user-guide/tracking.qmd:347",
+                "user-guide/cyclotron.qmd:151"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/cyclotron.qmd#cyclotron-modelling-0::opalx-09276::v3",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "wrong formula",
+                "self-contradictory answer",
+                "invalid input deck"
+              ],
+              "comment": "Uses angle k·π/8 instead of k·2π/SYM, so computes X=0, Z=3.3, THETA=-π/2 (correct: X=-3.3, Z=0, THETA=-π). The code block it outputs is just the unchanged SM0 (X=3.3, THETA=0), contradicting its own text. No comment on Y being vertical.",
+              "certainty": "high",
+              "evidence": [
+                "user-guide/cyclotron.qmd:36-40"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/diagnostics-output.qmd#cartesian-mode-5::opalx-05388::v1",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Correct: existing file is overwritten. \"OPALX adds no extension\" is unverified extra.",
+              "certainty": "high",
+              "evidence": [
+                "user-guide/diagnostics-output.qmd:122"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/elements.qmd#beambeam-domain-4::opalx-14654::v1",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Right that the window is unchanged and the aperture change does not improve resolution. Does not state the fixed IP ±10 mm window or that aperture size does not establish adequate resolution (it phrases it as \"does not alter\").",
+              "certainty": "medium",
+              "evidence": [
+                "user-guide/elements.qmd:155-158",
+                "user-guide/elements.qmd:170-172"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/elements.qmd#bends-15::opalx-08003::v3",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "confused entity"
+              ],
+              "comment": "Swaps the two meanings of L: RBEND's L is the straight body length, SBEND's L is the design-orbit arc length. Also invents \"K0 serves as the reference dipole for normalization\" instead of \"if K0 is omitted, the dipole is derived from ANGLE and geometry\".",
+              "certainty": "high",
+              "evidence": [
+                "user-guide/elements.qmd:516-526"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/elements.qmd#bends-15::opalx-11617::v1",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Deck is exactly right (K0S=0.01, HAPERT=0.03, no K0). The explanation is wrong: omitting K0 makes OPALX derive the dipole from ANGLE (not \"default 0 would clear it\"), and HAPERT installs a rectangular aperture; the VAPERT default claim is invented.",
+              "certainty": "medium",
+              "evidence": [
+                "user-guide/elements.qmd:524-532"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/elements.qmd#common-element-syntax-1::opalx-11330::v2",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "confused entity"
+              ],
+              "comment": "Confuses X/Y/Z with the misalignments DX/DY/DZ. X, Y, Z are the absolute lab-frame origin in metres, default 0 m, and setting one selects pose placement.",
+              "certainty": "high",
+              "evidence": [
+                "user-guide/elements.qmd:58-61"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/elements.qmd#constant-electric-field-cavity-5::opalx-01443::v3",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "incomplete answer"
+              ],
+              "comment": "One vague sentence. Misses that EX/EY/EZ are uniform local Cartesian components in MV/m applied for local 0 < z ≤ L, and that it is a DC element.",
+              "certainty": "medium",
+              "evidence": [
+                "user-guide/elements.qmd:189-197"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/elements.qmd#cyclotronsector-13::opalx-16813::v1",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "confused entity"
+              ],
+              "comment": "Names RMIN with 0 < RMIN < 1. The inverse-metre parameter is SLPTC, which must be finite and positive.",
+              "certainty": "high",
+              "evidence": [
+                "user-guide/elements.qmd:442-444"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/elements.qmd#multipole-8::opalx-05593::v2",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Correct: use a positive L; zero-length integrated operation is not effective in the current parallel kernel.",
+              "certainty": "high",
+              "evidence": [
+                "user-guide/elements.qmd:285-288"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/elements.qmd#multipole-8::opalx-10658::v3",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "invented mechanism"
+              ],
+              "comment": "Gives a wrong reason (regression maintenance). The documented reason: the bulk particle kernel applies only indices 0 and 1 while the host/reference kernel evaluates higher orders, so higher entries change the reference orbit without acting on the particles.",
+              "certainty": "high",
+              "evidence": [
+                "user-guide/elements.qmd:279-283"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/elements.qmd#solenoid-10::opalx-08321::v2",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Correct: unset KS is read as 0; add KS=0.12.",
+              "certainty": "high",
+              "evidence": [
+                "user-guide/elements.qmd:337"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/elements.qmd#travelingwave-12::opalx-14055::v2",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Correct fragment.",
+              "certainty": "high",
+              "evidence": [
+                "user-guide/elements.qmd:388-393"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/field-solver/index.qmd#open-periodic-boundaries-6::opalx-09279::v3",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Fragment and justification (P3M supports uniformly periodic) correct. The extra claim \"TYPE=FFT requires at least one BCFFT*=OPEN\" is wrong: the periodic box is TYPE=FFT with all PERIODIC.",
+              "certainty": "medium",
+              "evidence": [
+                "user-guide/field-solver/index.qmd:203-215"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/field-solver/index.qmd#shared-particle-mesh-model-0::opalx-03297::v3",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "invalid input deck"
+              ],
+              "comment": "Invalid deck: puts LINE/BEAM/DT/MAXSTEPS/ZSTOP on RUN instead of TRACK, defines no FIELDSOLVER, claims \"RUN ends the block\" (ENDTRACK does), and leaves out the TYPE=NONE solver the question asks for.",
+              "certainty": "high",
+              "evidence": [
+                "user-guide/field-solver/index.qmd:24-43"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/input-language.qmd#execution-order-6::opalx-00856::v2",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Right: input is processed in order and referenced things must normally be defined first. Says \"object\" rather than the manual's \"values, objects, and macros\".",
+              "certainty": "medium",
+              "evidence": [
+                "user-guide/input-language.qmd:230-232"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/input-language.qmd#execution-order-6::opalx-08085::v2",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "confused entity"
+              ],
+              "comment": "Names COF and TRACK as optional. The optional parts are BINNING (step 4) and the named COF for a static ring; TRACK/RUN/ENDTRACK is not optional.",
+              "certainty": "high",
+              "evidence": [
+                "user-guide/input-language.qmd:240-244"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/input-language.qmd#simulation-definitions-3::opalx-13788::v3",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "incomplete answer"
+              ],
+              "comment": "\"Exactly one distribution\" is right, but it lists only offsets and timing; the manual also names emission energy and image-charge settings.",
+              "certainty": "medium",
+              "evidence": [
+                "user-guide/input-language.qmd:146"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/introduction/index.qmd#introduction-0::opalx-06414::v3",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "contradicts the manual"
+              ],
+              "comment": "Inverts the roles: says the field solver couples external fields and that removing it keeps self-fields. The solver is the optional collective-field (space-charge) component; external fields come from elements.",
+              "certainty": "high",
+              "evidence": [
+                "user-guide/introduction/index.qmd:21-27"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/introduction/index.qmd#introduction-0::opalx-11304::v1",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "contradicts the manual",
+                "hallucinated identifier"
+              ],
+              "comment": "Wrong steps: starts with a worked example (skips installation), invents a \"cyclotron-500\" example and a \"Structure and workflow\" page. The manual: follow installation, run a worked input, read Input Language and Execution.",
+              "certainty": "high",
+              "evidence": [
+                "user-guide/introduction/index.qmd:31-35"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/options.qmd#numerical-linear-transfer-maps-4::opalx-03806::v3",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Correct diagnosis (range 0-4) and fix (level 4), with right cost. Does not state that level 4 is the formal tenth order the user wanted.",
+              "certainty": "medium",
+              "evidence": [
+                "user-guide/options.qmd:89"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/options.qmd#numerical-linear-transfer-maps-4::opalx-09494::v1",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "incomplete answer"
+              ],
+              "comment": "Gets the OrbitThreader pass and \"settings printed before the combined matrix\". But it assumes RICHARDSON=0 and fixed steps instead of describing the sequence, omits that settings are copied at OrbitThreader construction (later OPTION keeps unset values), and omits the per-segment records (start/finest amplitude, level, integrator, last refinement change).",
+              "certainty": "medium",
+              "evidence": [
+                "user-guide/options.qmd:103-108"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/tracking.qmd#opalx-cof-command-9::opalx-09768::v3",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "incomplete answer",
+                "hallucinated identifier"
+              ],
+              "comment": "Right that COF does not load the source distributions. Misses most of what COF skips (it is separate from TRACK, emits no particles, runs no collective physics, does not change BEAM) and that BEAM requirements (NALLOC, SOURCES, explicit total energy) still apply. \"Creates a reference PartBunch for element placement\" and \"global processes\" are invented.",
+              "certainty": "medium",
+              "evidence": [
+                "user-guide/tracking.qmd:320-338"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/tracking.qmd#opalx-cof-command-9::opalx-12310::v1",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Correct: total energy in GeV, ENERGY=PMASS+0.072. The last sentence (\"used together with its PC, ENERGY and MASS\") is garbled filler.",
+              "certainty": "high",
+              "evidence": [
+                "user-guide/tracking.qmd:334-336"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/tracking.qmd#opalx-initial-orbit-13::opalx-00067::v2",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "invalid input deck",
+                "incomplete answer"
+              ],
+              "comment": "The TRACK/RUN/ENDTRACK block is right, but the requested `FS0: FIELDSOLVER, TYPE=NONE, NX=16, NY=16, NZ=16;` definition is missing, so FIELDSOLVER=FS0 refers to an undefined object and the fragment does not run.",
+              "certainty": "high",
+              "evidence": [
+                "user-guide/tracking.qmd:416-422"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/tracking.qmd#results-and-parallel-behavior-12::opalx-03754::v2",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Correct: solve on rank zero; launch state, diagnostics and failure status broadcast.",
+              "certainty": "high",
+              "evidence": [
+                "user-guide/tracking.qmd:409-411"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/tracking.qmd#solver-controls-on-cof-11::opalx-12535::v2",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "invented mechanism",
+                "hallucinated identifier"
+              ],
+              "comment": "Invents step bounds MAXX/MAXPX/MAXY/MAXPY as the reason. The documented reason: with DAMPING=FALSE only a full Newton step that reduces the residual is accepted; a non-reducing full step is not taken.",
+              "certainty": "high",
+              "evidence": [
+                "user-guide/tracking.qmd:375"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/tracking.qmd#tracking-0::opalx-01285::v1",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "wrong value or unit",
+                "hallucinated identifier"
+              ],
+              "comment": "Wrong defaults: MAXSTEPS defaults to {10} (not 1), ZSTOP to {1e6} m (not 0). MAXPATH is a COF attribute, not TRACK, and PARFFT*/FFT2D5 are FIELDSOLVER matters unrelated to the question. Misses the consequence that defaults stop after 10 steps.",
+              "certainty": "high",
+              "evidence": [
+                "user-guide/tracking.qmd:28-33"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/tracking.qmd#turns-5::opalx-01666::v2",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": false,
+              "failure_categories": [
+                "confused entity"
+              ],
+              "comment": "Answers EKINSTOP (energy target). The attribute is TURNS=N.",
+              "certainty": "high",
+              "evidence": [
+                "user-guide/tracking.qmd:222-226"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        },
+        {
+          "id": "user-guide/tracking.qmd#turns-5::opalx-07070::v1",
+          "keep": true,
+          "keep_reason": "",
+          "comment": "",
+          "answers": [
+            {
+              "model": "run03-1epochs-8B",
+              "correct": true,
+              "failure_categories": [],
+              "comment": "Right: launch reference position and the initial momentum direction (as the normal). Does not say \"normal to\" explicitly.",
+              "certainty": "medium",
+              "evidence": [
+                "user-guide/tracking.qmd:228-229"
+              ]
+            }
+          ],
+          "sent_at": "2026-10-20T11:34:28"
+        }
+      ]
+    }
+  },
+  "agent_review": {
+    "evaluator": "claude opus5.5",
+    "model_id": "claude-opus-5-5",
+    "timestamp": "2026-10-20T11:34:28",
+    "split": "eval",
+    "adapters": [
+      "run03-1epochs-8B"
+    ],
+    "book": "manual",
+    "sources": {
+      "opalx-manual": {
+        "url": "https://github.com/OPALX-project/opalx-manual",
+        "commit": "4d8fab80dc0fff7eead00c0166dd5634a7cd1371",
+        "date": "2026-10-15",
+        "pulled": "2026-10-20 11:24"
+      },
+      "opal-manual": {
+        "url": "https://github.com/OPALX-project/opal-manual",
+        "commit": "d3e6eb2c788cf4074fa176ed2ac39d05da1052ed",
+        "date": "2026-07-24",
+        "pulled": "2026-10-20 11:24"
+      }
+    },
+    "questions": 100,
+    "of_split": 402,
+    "keep": {
+      "yes": 99,
+      "no": 1,
+      "unset": 0
+    },
+    "stats": {
+      "run03-1epochs-8B": {
+        "reviewed": 100,
+        "correct": 45,
+        "incorrect": 55,
+        "certainty": {
+          "high": 55,
+          "medium": 45
+        },
+        "failure_categories": {
+          "contradicts the manual": 5,
+          "confused entity": 9,
+          "hallucinated identifier": 10,
+          "wrong value or unit": 8,
+          "wrong formula": 9,
+          "invented mechanism": 5,
+          "right verdict, wrong reason": 5,
+          "incomplete answer": 12,
+          "invalid input deck": 7,
+          "self-contradictory answer": 2
+        },
+        "by_question_category": {
+          "code_convention": {
+            "correct": 1,
+            "incorrect": 3
+          },
+          "dev_workflow": {
+            "correct": 10,
+            "incorrect": 3
+          },
+          "framework_idiom": {
+            "correct": 3,
+            "incorrect": 3
+          },
+          "input deck": {
+            "correct": 14,
+            "incorrect": 21
+          },
+          "numerics": {
+            "correct": 7,
+            "incorrect": 11
+          },
+          "physics": {
+            "correct": 10,
+            "incorrect": 14
+          }
+        }
+      }
+    },
+    "categories": [
+      {
+        "name": "contradicts the manual",
+        "description": "States the opposite of a documented behavior or rule (e.g. 'rejected' becomes 'ignored', '=' and ':=' swapped, a solver that couples external fields). Use when the claimed fact is inverted, not merely missing. Not for answers that pick the wrong attribute or class: use 'confused entity'."
+      },
+      {
+        "name": "confused entity",
+        "description": "Answers about a neighboring attribute, element, class or beam instead of the one asked (EKINSTOP for TURNS, DX for X, RMIN for SLPTC, daughter instead of parent beam, RBEND/SBEND swapped). The fact may be right for the other entity. Not for names that do not exist at all: use 'hallucinated identifier'."
+      },
+      {
+        "name": "hallucinated identifier",
+        "description": "Uses an attribute, option, class, method signature, file-format column or syntax that does not exist in the manual (REBIN, VARIABLE(...), MAXX, HDF5Plugin, VectorXd parameters, '%' in the expression grammar). Not for real names with a wrong value: use 'wrong value or unit'."
+      },
+      {
+        "name": "wrong value or unit",
+        "description": "A real quantity, default, unit or quoted number is wrong (t in s instead of ns, MAXSTEPS default 1 instead of 10, R16/R26 digits, accepted EMISSIONMODEL values). Not for derived formulas: use 'wrong formula'."
+      },
+      {
+        "name": "wrong formula",
+        "description": "A documented equation is replaced by an invented or garbled one (Boris update, Michel spectrum, sector placement angle, decay condition, RK right-hand side) or applied wrongly. Not for single wrong numbers: use 'wrong value or unit'."
+      },
+      {
+        "name": "invented mechanism",
+        "description": "The explanation of how or why something works is a plausible but undocumented story (generic PIC steps, 'singular eigenvectors', regression maintenance as the reason to use MULTIPOLET). Use when the headline answer is also wrong or there is no yes/no verdict. When the verdict is right and only the reason is invented, use 'right verdict, wrong reason'."
+      },
+      {
+        "name": "right verdict, wrong reason",
+        "description": "The yes/no or diagnostic verdict matches the reference, but the supporting reason, list or numbers are invented, so a user acting on the explanation would be misled. Boundary to 'invented mechanism': here the top-line answer is right."
+      },
+      {
+        "name": "incomplete answer",
+        "description": "Points in the right direction but leaves out the key content the question asks for (formula, second half of a two-part question, the actual layout or condition), so it does not answer the question. Not for answers whose content is wrong: use the specific error category."
+      },
+      {
+        "name": "invalid input deck",
+        "description": "A produced or corrected OPALX input fragment would not parse, refers to undefined objects, still has the reported error, or ignores an explicit constraint of the request (terminator, single statement, required attribute)."
+      },
+      {
+        "name": "self-contradictory answer",
+        "description": "The answer contradicts itself (code block vs text, 'not ignored' then 'reads only the first N', repeating the user's own command as the fix). Use as a secondary category when another error is primary."
+      }
+    ],
+    "analysis": {
+      "summary": "On a stratified 100-question sample of the run03 eval split (held-out families from chunks the adapter trained on), run03-1epochs-8B is correct on 45. It is strong on short rule recall and dev_workflow (10/13): flags and defaults (IPPL_ENABLE_TESTS OFF, KS read as 0, NPARTDIST prefix, POLARIZATION={0,0,0}), simple deck edits and yes/no diagnoses. It is weak on exact recall of formulas, numbers and class/method signatures, and on deck generation (input deck 14/35, code_convention 1/4). Compared with manual-eval (29 %), the higher rate comes from the shorter single-fact questions; the error mix shifts from invented mechanisms to confused neighbouring entities, hallucinated identifiers and wrong numbers. The base model is wrong or generic on almost all items, often with visible thinking traces. One reference is self-contradictory (eval 37) and is dropped.",
+      "failure_modes": [
+        {
+          "category": "invented mechanism",
+          "severity": "high",
+          "root_cause": "capacity",
+          "explanation": "For how/why questions the adapter produces a fluent, OPALX-flavoured explanation that is not in the manual (generic PIC steps, 'singular eigenvectors', regression maintenance), often introduced with 'The documented...' or 'The documentation says...'. This phrasing was learned from the training references but is attached to invented content, so the confidence signal is worthless.",
+          "example_ids": [
+            "physics/gamma-gamma/index.qmd#_cain_structure-13::opalx-00977::v1",
+            "physics/beam-beam/index.qmd#sec-beam-beam-track12-9::opalx-09758::v1",
+            "physics/linear-transfer-maps.qmd#field-support-boundary-subdivision-6::opalx-10303::v1",
+            "user-guide/elements.qmd#multipole-8::opalx-10658::v3"
+          ],
+          "fix": "Train longer or with higher LoRA rank (1 epoch of an 8B 4-bit model does not store the long-tail mechanisms of 291 chunks); add families whose output reproduces the documented causal chain step by step; in the teacher prompt avoid the 'The documented ...' preamble so the model cannot use it as a style marker."
+        },
+        {
+          "category": "incomplete answer",
+          "severity": "medium",
+          "root_cause": "training",
+          "explanation": "Answers are short and stop after the first correct sentence; multi-part questions lose the second part (planned validation sequence, placement advice, mesh orientation). Base answers are long and generic, the fine-tune swung to terse.",
+          "example_ids": [
+            "user-guide/elements.qmd#constant-electric-field-cavity-5::opalx-01443::v3",
+            "physics/overview/index.qmd#sec-0::opalx-08640::v1",
+            "user-guide/options.qmd#numerical-linear-transfer-maps-4::opalx-09494::v1",
+            "user-guide/appendix/autophase/index.qmd#refinement-by-direct-tracking-6::opalx-11358::v2",
+            "user-guide/input-language.qmd#simulation-definitions-3::opalx-13788::v3"
+          ],
+          "fix": "Raise the share of multi-part questions whose reference enumerates every part; add a reviewer check 'answer covers every sub-question'; check max_new_tokens is not the limit (it was not in these samples)."
+        },
+        {
+          "category": "confused entity",
+          "severity": "high",
+          "root_cause": "data",
+          "explanation": "The adapter knows the right neighbourhood but picks the neighbour: EKINSTOP for TURNS, DX for X, swapped RBEND/SBEND length, RMIN for SLPTC, daughter instead of parent beam.",
+          "example_ids": [
+            "user-guide/tracking.qmd#turns-5::opalx-01666::v2",
+            "user-guide/elements.qmd#bends-15::opalx-08003::v3",
+            "user-guide/elements.qmd#common-element-syntax-1::opalx-11330::v2",
+            "user-guide/elements.qmd#cyclotronsector-13::opalx-16813::v1",
+            "user-guide/beam.qmd#multiple-species-decay-and-spin-1::opalx-17622::v2"
+          ],
+          "fix": "Add contrastive families in prepare02 that ask for the difference between neighbouring attributes in the same table and 'which attribute does X' items with near-miss distractors."
+        },
+        {
+          "category": "hallucinated identifier",
+          "severity": "high",
+          "root_cause": "capacity",
+          "explanation": "When it does not know the name it invents one that looks like OPALX (REBIN, VARIABLE(\"...\"), MAXX/MAXPX, HDF5Plugin, VectorXd parameters, six-column field-map rows). For an agent that pastes these into a deck this is the most damaging error.",
+          "example_ids": [
+            "physics/cyclotron.qmd#energy-target-semantics-and-long-run-comparison-3::opalx-02372::v1",
+            "physics/elements/index.qmd#sbend-and-rbend-class-structure-7::opalx-09301::v3",
+            "user-guide/appendix/field-maps/index.qmd#opalx-field-maps-0::opalx-11189::v3",
+            "developer-guide/space-charge-solver-architecture.qmd#space-charge-class-architecture-2::opalx-17425::v3",
+            "user-guide/appendix/autophase/index.qmd#search-strategy-5::opalx-19240::v2"
+          ],
+          "fix": "Measure it automatically (identifier existence check); add attribute-table recall families (each table row as its own fact) so names are seen in many contexts."
+        },
+        {
+          "category": "wrong formula",
+          "severity": "medium",
+          "root_cause": "capacity",
+          "explanation": "Equations are rewritten with wrong signs, factors or variables (Boris update, Michel spectrum, sector placement angle, RK right-hand side) while keeping the right shape.",
+          "example_ids": [
+            "physics/decay-processes/index.qmd#v-a-polarization-of-the-daughter-muon-2::opalx-01769::v3",
+            "physics/cyclotron.qmd#final-reference-return-event-1::opalx-02266::v1",
+            "user-guide/cyclotron.qmd#cyclotron-modelling-0::opalx-09276::v3",
+            "physics/linear-transfer-maps.qmd#map-only-runge-kutta-integration-7::opalx-13689::v3"
+          ],
+          "fix": "Add equation-cloze families (ask for one term at a time) and more paraphrases per equation; track with the formula-cloze benchmark."
+        },
+        {
+          "category": "right verdict, wrong reason",
+          "severity": "medium",
+          "root_cause": "training",
+          "explanation": "The top-line verdict ('No', 'Not necessarily', 'This is expected') is right far more often than the reason. The verdict pattern is easy to learn from the paraphrase families; the reason needs exact recall.",
+          "example_ids": [
+            "physics/map-3-fringe-dba.qmd#map3-cas-edge-8::opalx-11143::v2",
+            "physics/beam-beam/index.qmd#sec-beam-beam-architecture-14::opalx-11274::v2",
+            "physics/cyclotron.qmd#experimental-discrete-rf-tracking-2::opalx-15363::v2",
+            "user-guide/beam-distributions.qmd#emissionsource-1::opalx-15406::v3"
+          ],
+          "fix": "Score verdict and reason separately; in data generation, require the reason to quote the chunk's causal sentence; more epochs."
+        },
+        {
+          "category": "invalid input deck",
+          "severity": "high",
+          "root_cause": "data",
+          "explanation": "Generated or corrected decks drop required objects (FS0 definition, BINS link, MAXPATH), put TRACK attributes on RUN, split one statement into two definitions, or ignore explicit constraints (no terminator).",
+          "example_ids": [
+            "user-guide/tracking.qmd#opalx-initial-orbit-13::opalx-00067::v2",
+            "user-guide/command-format/index.qmd#logical-expressions-1::opalx-01344::v2",
+            "user-guide/command-format/index.qmd#command-format-0::opalx-02878::v3",
+            "user-guide/field-solver/index.qmd#shared-particle-mesh-model-0::opalx-03297::v3",
+            "user-guide/appendix/language-syntax/index.qmd#real-array-expressions-and-definitions-2::opalx-05809::v3"
+          ],
+          "fix": "Add deck-completion families built from the worked inputs with the full corrected fragment as output, and validate them with the OPALX parser when the code source is added."
+        },
+        {
+          "category": "wrong value or unit",
+          "severity": "medium",
+          "root_cause": "capacity",
+          "explanation": "Units and defaults fall back to the base model's SI prior (t in s, E in V/m) or are made up (MAXSTEPS default 1, ZSTOP default 0, R16/R26 digits).",
+          "example_ids": [
+            "user-guide/tracking.qmd#tracking-0::opalx-01285::v1",
+            "physics/map-3-fringe-dba.qmd#initial-ring-validation-1::opalx-05730::v2",
+            "physics/beam-beam/index.qmd#sec-beam-beam-current-results-13::opalx-16583::v1",
+            "physics/map-3-fringe-dba.qmd#map3-reference-comparison-9::opalx-19928::v2"
+          ],
+          "fix": "Attribute-default recall families from every table row; benchmark with exact match."
+        },
+        {
+          "category": "contradicts the manual",
+          "severity": "high",
+          "root_cause": "capacity",
+          "explanation": "Some answers state the opposite of the documented rule ('accepted and stored' for rejected BCURRENT, TURNS with space charge and RF, '=' updates vs ':=' defines, solver couples external fields).",
+          "example_ids": [
+            "physics/linear-transfer-maps.qmd#closed-orbit-launch-handover-14::opalx-04442::v2",
+            "user-guide/introduction/index.qmd#introduction-0::opalx-06414::v3",
+            "physics/map-3-fringe-dba.qmd#initial-ring-validation-1::opalx-18110::v1"
+          ],
+          "fix": "Same as for confused entity: contrastive families around negations (rejected / ignored / not supported) which the teacher should phrase explicitly."
+        }
+      ],
+      "dataset_issues": [
+        {
+          "issue": "Reference answers the yes/no question with 'No.' and then says checkpoints are still written (the body is right, the leading 'No' is wrong).",
+          "example_ids": [
+            "reference/file-formats.qmd#checkpoint-restart-3::opalx-08002::v1"
+          ],
+          "fix": "Fix this family's output in the export (and its train paraphrases); add a reviewer check that the first word of a yes/no answer agrees with the body."
+        },
+        {
+          "issue": "Several eval questions are near-duplicates of each other on the same chunk (tolerance question on map-3 reference, R16/R26 run), which is expected from the family design but means per-chunk knowledge is counted more than once.",
+          "example_ids": [
+            "physics/map-3-fringe-dba.qmd#map3-reference-comparison-9::opalx-01993::v1",
+            "physics/map-3-fringe-dba.qmd#map3-reference-comparison-9::opalx-04704::v2",
+            "physics/map-3-fringe-dba.qmd#initial-ring-validation-1::opalx-05730::v2",
+            "physics/map-3-fringe-dba.qmd#initial-ring-validation-1::opalx-13390::v3",
+            "physics/map-3-fringe-dba.qmd#initial-ring-validation-1::opalx-16164::v1",
+            "physics/map-3-fringe-dba.qmd#initial-ring-validation-1::opalx-18110::v1"
+          ],
+          "fix": "Report eval accuracy also per chunk (macro average) next to per question."
+        }
+      ],
+      "benchmarks": [
+        {
+          "name": "attribute-default recall",
+          "targets": [
+            "wrong value or unit",
+            "hallucinated identifier",
+            "confused entity"
+          ],
+          "design": "Auto-extract every row of the manual's Parameter/Default/Unit tables (user-guide/*.qmd, options.qmd, tracking.qmd, beam*.qmd, elements.qmd) into short items: 'Default of TRACK MAXSTEPS?', 'Unit of DUMPEMFIELDS t?', 'Which values does MULTIVARIATEGAUSS accept for EMISSIONMODEL?'. Each item has one exact answer plus 3 distractors taken from neighbouring rows of the same table.",
+          "size": "~600 items (all table rows at the pinned manual commit)",
+          "metric": "exact match on the generated answer + log-prob multiple choice with the recognition scorer (acc_norm)",
+          "why": "The current eval mixes fact recall with long explanations; this isolates whether the adapter stores the hard facts (defaults, units, allowed values) that a user deck depends on, and is cheap to regenerate for every commit."
+        },
+        {
+          "name": "neighbour-confusion MC",
+          "targets": [
+            "confused entity",
+            "contradicts the manual"
+          ],
+          "design": "Pairs of easily confused OPALX entities from the manual: TURNS vs EKINSTOP, X/Y/Z vs DX/DY/DZ, RBEND vs SBEND meaning of L, SLPTC vs RMIN on TRIMCOIL, BOUNDPDESTROY/REPARTFREQ vs REBINFREQ, rejected vs ignored attributes (BCURRENT, E1/E2), '=' vs ':='. Each item asks for the one that fits a description.",
+          "size": "~150 items",
+          "metric": "log-prob multiple choice (same scorer as recognition)",
+          "why": "9 eval answers named the wrong neighbouring attribute or entity; the free-text judge cannot tell 'knows nothing' apart from 'mixes up two real things', and the fix (contrastive training families) is different."
+        },
+        {
+          "name": "identifier existence check",
+          "targets": [
+            "hallucinated identifier"
+          ],
+          "design": "Extract every backticked token and every ATTR= token from the adapter's answers on eval/manual-eval/test and look it up in an identifier set built from the manual (all code spans, attribute tables, class names); later also from the OPALX source (src/ attribute registrations).",
+          "size": "runs on all existing answers, no new questions",
+          "metric": "hallucinated-identifier rate per answer (automatic, no judge)",
+          "why": "Invented names (REBIN, MAXX, VARIABLE(), HDF5Plugin, VectorXd parameters) are the most harmful error for an agent that copies them into a deck, and this metric is free once the identifier set exists."
+        },
+        {
+          "name": "deck completion with parser check",
+          "targets": [
+            "invalid input deck",
+            "hallucinated identifier"
+          ],
+          "design": "Take the worked inputs and manual fragments, delete or corrupt one statement (missing FIELDSOLVER definition, DT schedule on COF, missing MAXPATH, BINS not attached), and ask the adapter to complete or fix it. Check the result with the OPALX parser in a dry-run/parse-only mode (or a grammar check derived from the attribute tables until the code is available).",
+          "size": "~100 decks",
+          "metric": "parse success + required-attribute check (automatic)",
+          "why": "Several 'fixed' decks still fail (eval 1, 20; manual-eval 5, 63), but the text judge often gives partial credit to a deck that would not run."
+        },
+        {
+          "name": "verdict-and-reason split",
+          "targets": [
+            "right verdict, wrong reason",
+            "invented mechanism",
+            "incomplete answer"
+          ],
+          "design": "Reuse the diagnostic questions ('Is this a porting bug?', 'Why is the override ignored?') and score two fields separately: the verdict (yes/no/which) by exact match and the reason against a 2-4 point checklist taken from the chunk.",
+          "size": "~120 items from existing eval/manual-eval families",
+          "metric": "verdict accuracy and checklist recall (LLM judge per checklist point)",
+          "why": "The adapter often gets the verdict right and then invents the reason (manual-eval 2, 7, 12, 18; eval 56, 58, 79, 80); a single 1-10 score hides that it has learned the verdicts but not the explanations."
+        },
+        {
+          "name": "formula cloze",
+          "targets": [
+            "wrong formula"
+          ],
+          "design": "Take display equations from physics/*.qmd (Boris update, decay probability, Michel spectrum, sector placement, fringe ψ, R56 sign, α in the map-3 reference) and ask for one term or the full right-hand side.",
+          "size": "~80 equations",
+          "metric": "symbolic comparison after normalisation (sympy) where possible, else LLM judge",
+          "why": "Formula answers were wrong in 6 manual-eval and 9 eval questions, usually with fluent but invented algebra; this tracks whether more epochs or rank actually fix exact recall."
+        }
+      ],
+      "judge_comparison": "judge_eval.jsonl was run on a different sample; 18 of my 100 questions overlap. On those, judge >= 7 agrees with my verdict on 17/18, with no hard disagreement (no judge >= 7 where I said wrong, no judge <= 4 where I said right). Mean judge score is 7.2 on answers I accepted and 1.8 on rejected ones.",
+      "next_steps": [
+        "Fix the self-contradictory reference (eval 37) in the export.",
+        "Add the identifier-existence check and attribute-default recall benchmark.",
+        "Add contrastive families for neighbouring attributes/elements and deck-completion families to prepare02.",
+        "Re-run this review on the same sample after the next training run (2 epochs / higher rank) for a like-for-like comparison."
+      ]
+    }
+  }
+}

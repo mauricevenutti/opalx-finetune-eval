@@ -332,7 +332,7 @@ $("nameform").onsubmit = e => {
     if (load(catsKey(), null) === null) store(catsKey(), oldCats);
   }
   store("viewer3:evaluator", name);
-  loadState(); showWho(); fillFailFilter(); applyFilters(); showSync();
+  loadState(); showWho(); fillFailFilter(); applyFilters(); showSync(); importFromUrl();
 };
 $("who").onclick = openNameDialog;
 $("sendall").onclick = () => {
@@ -694,12 +694,10 @@ $("dltxt").onclick = () => {
   download("annotations_" + fileBase() + ".txt", header + "\n" + parts.join("\n\n"), "text/plain");
 };
 
-$("imp").onclick = () => $("impfile").click();
-$("impfile").onchange = async () => {
-  const f = $("impfile").files[0]; $("impfile").value = "";
-  if (!f) return;
-  let data;
-  try { data = JSON.parse(await f.text()); } catch (e) { alert("Not a JSON file: " + e.message); return; }
+// Merges an export of this page, or a viewer/feedback file ({page, evaluators: {name: {failure_categories, items}}}).
+// send=false (link import) does not queue the questions for the feedback sheet.
+function importData(data, send) {
+  if (data.evaluators && !data.items) data = Object.values(data.evaluators)[0] || {};
   const byName = {};
   for (const c of cats) byName[c.name.toLowerCase()] = c.id;
   let newCats = 0;
@@ -724,12 +722,37 @@ $("impfile").onchange = async () => {
       j.cats = (a.failure_categories || []).map(nm => byName[String(nm).toLowerCase()]).filter(Boolean);
       j.comment = a.comment || "";
     }
-    prune(x.id); markDirty(x.id); n++;
+    prune(x.id); if (send) markDirty(x.id); n++;
   }
   save();
   fillFailFilter(); applyFilters();
-  alert("Imported " + n + " questions, " + newCats + " new categories" + (skipped ? ", " + skipped + " ids not on this page" : "") + ".");
+  return "Imported " + n + " questions, " + newCats + " new categories" + (skipped ? ", " + skipped + " ids not on this page" : "") + ".";
+}
+
+$("imp").onclick = () => $("impfile").click();
+$("impfile").onchange = async () => {
+  const f = $("impfile").files[0]; $("impfile").value = "";
+  if (!f) return;
+  let data;
+  try { data = JSON.parse(await f.text()); } catch (e) { alert("Not a JSON file: " + e.message); return; }
+  alert(importData(data, true));
 };
+
+// ?import=<json next to this page>: load a review (e.g. the agent review linked from the dashboard),
+// once per page and reviewer name. Runs after the state is loaded (online: after the name dialog).
+async function importFromUrl() {
+  const src = new URLSearchParams(location.search).get("import");
+  if (!src || /^[a-z]+:|^\/\//i.test(src) || (ONLINE && !evaluator)) return;
+  const seen = load("viewer3:imported", []), key = PAGE + " " + evaluator + " " + src;
+  if (seen.includes(key)) return;
+  if (!confirm("Load the review " + src + " into your annotations on this page? Existing answers for the same questions are replaced.")) return;
+  try {
+    const r = await fetch(src);
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    alert(importData(await r.json(), false));
+    seen.push(key); store("viewer3:imported", seen);
+  } catch (e) { alert("Could not load " + src + ": " + e.message); }
+}
 
 $("clear").onclick = () => {
   if (!Object.keys(notes).length) return;
@@ -757,6 +780,7 @@ function jumpToHash() {
 }
 window.addEventListener("hashchange", jumpToHash);
 jumpToHash();
+importFromUrl();
 </script>
 </body>
 </html>
