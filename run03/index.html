@@ -83,13 +83,16 @@ label.ck { font:13px system-ui, sans-serif; margin-right:6px; cursor:pointer; wh
 .links td a { margin-right:12px; }
 .md { max-width:84ch; } .md li { margin:2px 0; }
 code { font:13px ui-monospace, Menlo, monospace; background:#f3f3f1; padding:0 3px; }
+/* questions.html: same page, only the elements marked .qv */
+body.qview main > :not(.qv) { display:none; }
+body:not(.qview) .qv-only { display:none; }
 </style>
 </head>
 <body>
 <main>
-<div class="crumb"><a href="../">OPALX fine-tune evaluation</a> &rsaquo; <span id="crumbrun"></span></div>
-<h1 id="h1"></h1>
-<p class="sub" id="sub"></p>
+<div class="crumb qv"><a href="../">OPALX fine-tune evaluation</a> &rsaquo; <span id="crumbrun"></span><span class="qv-only"> &rsaquo; all judged questions</span></div>
+<h1 class="qv" id="h1"></h1>
+<p class="sub qv" id="sub"></p>
 <nav class="toc">
   <a href="#summary">1&nbsp;Summary</a><a href="#judge">2&nbsp;LLM judge</a><a href="#agent">3&nbsp;Agent review</a>
   <a href="#recognition">4&nbsp;Recognition</a><a href="#forgetting">5&nbsp;Forgetting</a><a href="#training">6&nbsp;Training</a><a href="#error-analysis">7&nbsp;Error Analysis</a>
@@ -108,13 +111,13 @@ outside the reference and chunk, so invented details count as wrong. With each s
   <dt><span class="cert medium">medium</span></dt><dd>part of the answer is not covered by the reference or chunk (extra details, a value phrased differently, several valid answers); the score could move by about 2.</dd>
   <dt><span class="cert low">low</span></dt><dd>correctness hinges on things the reference and chunk do not cover, or the reference itself looks wrong or ambiguous; the score could be off by 3 or more. Check these by hand first.</dd>
 </dl>
-<div class="controls">
+<div class="controls qv">
   <span class="lab">split</span><span class="seg" id="splitseg"></span>
   <span class="lab">judge certainty</span>
   <span><label class="ck"><input type="checkbox" value="high" checked> high</label><label class="ck"><input type="checkbox" value="medium" checked> medium</label><label class="ck"><input type="checkbox" value="low" checked> low</label></span>
   <span class="note" id="judgecount"></span>
 </div>
-<p class="note" id="splitinfo"></p>
+<p class="note qv" id="splitinfo"></p>
 <div class="tw" id="judgetable"></div>
 <div class="figrow">
   <figure><div class="fig"><div class="legend" id="lg-hist"></div><div id="fig-hist"></div></div>
@@ -122,9 +125,10 @@ outside the reference and chunk, so invented details count as wrong. With each s
   <figure><div class="fig"><div class="legend" id="lg-cat"></div><div id="fig-cat"></div></div>
     <figcaption><b>Figure 2.</b> Mean judge score per question category; n in brackets. Hover a bar for the median.</figcaption></figure>
 </div>
-<h3>All judged questions</h3>
-<p class="note">Click a score to open the answer on its Error Analysis page; click a column header to sort.</p>
-<div class="tw" id="questiontable"></div>
+<h3><a id="qlink" href="questions.html">All judged questions</a></h3>
+<p class="note">Sortable table of every judged answer with score, certainty and the judge's rationale, on its own page (opens with the split and certainty selected here).</p>
+<p class="note qv qv-only">Click a score to open the answer on its Error Analysis page; click a column header to sort.</p>
+<div class="tw qv" id="questiontable"></div>
 
 <h2 id="agent"><span class="num">3</span>Agent review</h2>
 <p class="lead">An open-book expert review by Claude (skill <i>opalx-error-analysis</i>): every fine-tuned answer checked against the
@@ -353,8 +357,13 @@ function lineChart(el, series, o) {
 }
 
 // ---------- header + summary ----------
-$("crumbrun").textContent = D.run;
-$("h1").textContent = D.run;
+const QVIEW = D.view === "questions";
+if (QVIEW) {
+  document.body.classList.add("qview");
+  document.title = D.run + ": all judged questions";
+  $("crumbrun").innerHTML = `<a href="./">${E(D.run)}</a>`;
+} else $("crumbrun").textContent = D.run;
+$("h1").textContent = QVIEW ? D.run + ": all judged questions" : D.run;
 $("sub").textContent = "updated " + D.updated;
 
 function judgeStats(block, certs) {
@@ -380,8 +389,11 @@ function judgeStats(block, certs) {
 })();
 
 // ---------- LLM judge ----------
-let curSplit = D.splits.find(s => A.some(a => a.judge[s])) || D.splits[0];
+// questions.html#split=eval&cert=high,medium opens with the dashboard's selection
+const H = new URLSearchParams(location.hash.slice(1));
+let curSplit = D.splits.includes(H.get("split")) ? H.get("split") : D.splits.find(s => A.some(a => a.judge[s])) || D.splits[0];
 const certBoxes = [...document.querySelectorAll(".controls input[type=checkbox]")];
+if (H.has("cert")) certBoxes.forEach(c => c.checked = H.get("cert").split(",").includes(c.value));
 $("splitseg").innerHTML = D.splits.map(s => `<button data-s="${E(s)}">${E(s)}</button>`).join("");
 $("splitseg").querySelectorAll("button").forEach(b => b.onclick = () => { curSplit = b.dataset.s; renderJudge(); });
 certBoxes.forEach(c => c.onchange = renderJudge);
@@ -389,6 +401,8 @@ certBoxes.forEach(c => c.onchange = renderJudge);
 function renderJudge() {
   $("splitseg").querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.s === curSplit));
   const certs = certBoxes.filter(c => c.checked).map(c => c.value);
+  const hash = "split=" + encodeURIComponent(curSplit) + "&cert=" + certs.join(",");
+  if (QVIEW) history.replaceState(null, "", "#" + hash); else $("qlink").href = "questions.html#" + hash;
   const blocks = A.map(a => a.judge[curSplit]);
   const anyb = blocks.find(Boolean);
   $("splitinfo").innerHTML = "<i>" + E(curSplit) + "</i>: " + E((D.split_info || {})[curSplit] || "") +
@@ -421,7 +435,7 @@ function renderJudge() {
     const v = g.s.rows.filter(r => r.cat === c).map(r => r.score);
     return v.length ? { mean: mean(v), median: median(v), n: v.length } : null;
   }) })), { max: 10, xlabel: "mean judge score" });
-  questionTable(blocks, certs);
+  if (QVIEW) questionTable(blocks, certs);
 }
 
 let qSort = { k: "n", dir: 1 };
