@@ -3,13 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>OPALX fine-tune evaluation</title>
+<title>Finetuning an OPALX expert</title>
 <style>
 :root { color-scheme:light; --fg:#1f1f1f; --muted:#5f5f5f; --rule:#1f1f1f; --hair:#d4d4d4; --link:#1d4f91; }
 body { margin:0; background:#fff; color:var(--fg); font:16px/1.55 Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif; }
 main { max-width:860px; margin:0 auto; padding:40px 16px 64px; }
 h1 { font-weight:normal; font-size:28px; margin:0 0 4px; letter-spacing:.01em; }
 .sub { color:var(--muted); font-style:italic; margin:0 0 28px; }
+h2 { font-weight:normal; font-size:22px; margin:36px 0 10px; border-bottom:1.5px solid var(--rule); padding-bottom:3px; }
+h3 { font-weight:normal; font-style:italic; font-size:18px; margin:22px 0 8px; }
+.num { color:var(--muted); margin-right:10px; }
+.note { color:var(--muted); font-style:italic; }
+.aside { font-style:normal; font-size:15px; }
 table { border-collapse:collapse; width:100%; border-top:1.5px solid var(--rule); border-bottom:1.5px solid var(--rule); }
 th { font-variant:small-caps; letter-spacing:.04em; font-weight:normal; text-align:left; color:var(--muted); border-bottom:.75px solid var(--rule); padding:6px 10px; }
 td { padding:8px 10px; border-bottom:1px solid var(--hair); vertical-align:top; }
@@ -21,12 +26,40 @@ td.run a { font-size:18px; }
 </head>
 <body>
 <main>
-<h1>OPALX fine-tune evaluation</h1>
-<p class="sub">Judge scores, recognition, forgetting, training curves, and the Error Analysis pages for reviewers.</p>
+<h1>Finetuning an OPALX expert</h1>
+<p class="sub">Background on the model and adapter, and the evaluation runs: judge scores, recognition, forgetting, training curves, and the Error Analysis pages for reviewers.</p>
+
+<h2><span class="num">1</span>Theory</h2>
+<table>
+<thead><tr><th>Article</th><th class="desc">Contents</th></tr></thead>
+<tbody>
+<tr><td class="run"><a href="theory/qwen3-lora.html">Qwen3 architecture and LoRA</a></td><td class="desc">Decoder block, grouped query attention, feed forward network, sampling, parameter counts, LoRA adapters</td></tr>
+<tr><td class="run"><a href="theory/training-loss.html">Training and Training Loss</a></td><td class="desc">TODO</td></tr>
+</tbody>
+</table>
+
+<h2><span class="num">2</span>Experiments</h2>
+
+<h3><span class="num">2.1</span>Tests with Manuals as Knowledge Source</h3>
 <table>
 <thead><tr><th>Run</th><th class="desc">Contents</th><th>Updated</th></tr></thead>
 <tbody>
 <tr><td class="run"><a href="run03/">run03</a></td><td class="desc">2 adapters (run03-1epochs-4B, run03-1epochs-8B)</td><td>2026-10-20</td></tr>
+</tbody>
+</table>
+
+<h3><span class="num">2.2</span>Tests with OPALX repo slice <span class="aside">(<a href="repo-slice/README.html">README</a>, <a href="repo-slice/sources.html">source files</a>)</span></h3>
+<table>
+<thead><tr><th>Experiment</th><th class="desc">Idea</th><th class="desc">Upshot</th></tr></thead>
+<tbody>
+<tr><td class="run"><a href="repo-slice/01/">01</a></td><td class="desc">Train the adapter on the original hand-written catalog: ten question–answer pairs for each of the 39 topics of the field-solver slice.</td><td class="desc">About 30% of the eval questions fully correct after 8 epochs (40% after 24 epochs), and none of the multi-topic compositions. More epochs plateau.</td></tr>
+<tr><td class="run"><a href="repo-slice/02/">02</a></td><td class="desc">Give every question about a topic the same mechanism answer and add four new question wordings per topic, so the model maps many phrasings onto one answer.</td><td class="desc">81% fully correct on eval, all 39 single-topic questions right, but 0 of 9 compositions: the adapter recognizes the topic and recites its paragraph.</td></tr>
+<tr><td class="run"><a href="repo-slice/02b/">02b</a></td><td class="desc">Answer the eval, demo and oracle questions again with every checkpoint of 02, sampling at Qwen3&#x27;s recommended temperature instead of greedy decoding. No training.</td><td class="desc">No change: the context-use bonus stays near zero from checkpoint 312 on. The fixation on the memorized paragraph sits in the weights, not in the decoding.</td></tr>
+<tr><td class="run"><a href="repo-slice/03/">03</a></td><td class="desc">Repeat 02 without its 4 new questions per topic, to separate the effect of one answer per topic from that of more question wordings.</td><td class="desc">60% fully correct at 8 epochs, 69% with as many exposures as 02 (vs 81% for 02, 29% for 01): most of the gain comes from one answer per topic, question diversity adds the rest.</td></tr>
+<tr><td class="run"><a href="repo-slice/04/">04</a></td><td class="desc">Add composition rows to 02: broad questions over 2–4 related topics whose answer is the topics&#x27; mechanism paragraphs joined verbatim, to teach answering questions that span several topics.</td><td class="desc">Does not help: compositions stay at 0 of 9 and single-topic questions get slightly worse. The demo coverage gain (0.23 → 0.60) comes from copying training compositions that overlap with the demo.</td></tr>
+<tr><td class="run"><a href="repo-slice/05/">05</a></td><td class="desc">Put the trained paragraphs needed for each composition question into the input, and test whether the base model and the 02 checkpoints can compose an answer from them. No training.</td><td class="desc">The base model uses the paragraphs (coverage 0.82); 02 stops using its input from checkpoint 78 on and recites one memorized paragraph. Fine-tuning damaged the use of context.</td></tr>
+<tr><td class="run"><a href="repo-slice/06/">06</a></td><td class="desc">Train the facts of 02 as plain text, without question template and without EOS, like continued pretraining, so that no output format is learned. Variant 06b appends an EOS token to every text.</td><td class="desc">Context use is kept (oracle coverage 0.61–0.69, base 0.82, 02 at most 0.43), but the facts barely come out when asked a question (closed-book coverage at most 0.21, 0 of 48 correct). The facts are stored, not retrievable by question.</td></tr>
+<tr><td class="run"><a href="repo-slice/07/">07</a></td><td class="desc">Continue the 06 adapter with question–answer rows in Qwen3&#x27;s native chat format with thinking: first recall the facts per topic, then connect them, then answer. Context rows teach picking the relevant paragraphs; 12 topics are held out.</td><td class="desc">Not run yet.</td></tr>
 </tbody>
 </table>
 </main>

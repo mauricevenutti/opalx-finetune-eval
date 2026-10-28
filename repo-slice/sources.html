@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Repo slice source files</title>
+<style>
+:root { color-scheme:light; --fg:#1f1f1f; --muted:#5f5f5f; --faint:#8a8a8a; --rule:#1f1f1f; --hair:#dcdcdc; --link:#1d4f91; --panel:#f7f7f5; }
+* { box-sizing:border-box; }
+body { margin:0; background:#fff; color:var(--fg); font:16px/1.6 Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif; }
+main { max-width:900px; margin:0 auto; padding:28px 16px 80px; }
+a { color:var(--link); }
+.crumb { font-size:14px; color:var(--muted); margin-bottom:18px; }
+h1 { font-weight:normal; font-size:32px; margin:0; letter-spacing:.01em; }
+.sub { color:var(--muted); font-style:italic; margin:2px 0 14px; }
+nav.toc { font-size:14px; border-top:1px solid var(--hair); border-bottom:1px solid var(--hair); padding:6px 0; margin-bottom:8px; }
+nav.toc a { margin-right:18px; text-decoration:none; } nav.toc a:hover { text-decoration:underline; }
+h2 { font-weight:normal; font-size:24px; margin:40px 0 6px; border-bottom:1.5px solid var(--rule); padding-bottom:3px; }
+h2 .num { color:var(--muted); margin-right:10px; }
+h3 { font-weight:normal; font-style:italic; font-size:18px; margin:22px 0 4px; }
+p { margin:6px 0 12px; max-width:80ch; }
+ul { max-width:80ch; padding-left:22px; } li { margin:3px 0; }
+.note { color:var(--muted); font-size:14px; }
+code { font-family:ui-monospace, Menlo, Consolas, monospace; font-size:13.5px; background:var(--panel); padding:0 3px; }
+dl.defs { display:grid; grid-template-columns:max-content 1fr; gap:4px 16px; font-size:15.5px; margin:8px 0 16px; }
+dl.defs dt { font-variant:small-caps; letter-spacing:.04em; color:var(--muted); }
+dl.defs dd { margin:0; }
+.tw { overflow-x:auto; margin:10px 0 6px; }
+table { border-collapse:collapse; width:100%; font-size:14.5px; border-top:1.5px solid var(--rule); border-bottom:1.5px solid var(--rule); }
+caption { caption-side:top; text-align:left; font-size:14px; color:var(--muted); padding-bottom:6px; }
+caption b { color:var(--fg); font-weight:normal; font-variant:small-caps; letter-spacing:.04em; }
+th { font-weight:normal; font-variant:small-caps; letter-spacing:.04em; color:var(--muted); text-align:left; padding:5px 10px; border-bottom:.75px solid var(--rule); white-space:nowrap; }
+td { padding:5px 10px; vertical-align:top; border-bottom:1px solid #f0f0f0; }
+tbody tr:last-child td { border-bottom:none; }
+td.n, th.n { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+tr.best td { font-weight:bold; }
+figure { margin:14px 0 18px; }
+figure img { max-width:100%; height:auto; border:1px solid var(--hair); }
+figcaption { font-size:14px; color:var(--muted); margin-top:4px; max-width:80ch; }
+.expl { font-size:15px; margin-top:4px; }
+.box { background:var(--panel); border-left:3px solid var(--rule); padding:8px 14px; margin:10px 0 14px; max-width:80ch; }
+.box p { margin:4px 0; }
+pre { background:var(--panel); padding:10px 12px; overflow-x:auto; font-size:13px; line-height:1.45; }
+pre code { background:none; padding:0; }
+.readme table { width:auto; }
+.readme td, .readme th { white-space:normal; }
+</style>
+</head>
+<body>
+<main>
+<div class="crumb"><a href="../">Finetuning an OPALX expert</a> &rsaquo; Tests with OPALX repo slice &rsaquo; source files</div>
+<h1>OPALX repo slice: source files</h1>
+<p class="sub">The 20 OPALX source excerpts that all 39 topics, the training data and the benchmark were written from, at commit <a href="https://github.com/OPALX-project/OPALX/tree/b5f495e2760209f3579c8a9375b9f4babbcd579b"><code>b5f495e</code></a> (<code>data/evidence/excerpts.jsonl</code>). The judge gets the same excerpts as its source of truth.</p>
+<div class="tw"><table><caption><b>Source excerpts (links go to the exact lines on GitHub)</b></caption><thead><tr><th class="">key</th><th class="">file</th><th class="n">lines</th><th class="n">line count</th></tr></thead><tbody>
+<tr><td class=""><code>command</code></td><td class=""><a href="https://github.com/OPALX-project/OPALX/blob/b5f495e2760209f3579c8a9375b9f4babbcd579b/src/Structure/FieldSolverCmd.cpp#L1-L242">src/Structure/FieldSolverCmd.cpp</a></td><td class="n">1–242</td><td class="n">242</td></tr>
+<tr><td class=""><code>builder</code></td><td class=""><a href="https://github.com/OPALX-project/OPALX/blob/b5f495e2760209f3579c8a9375b9f4babbcd579b/src/SpaceCharge/SpaceChargeConfigBuilder.cpp#L1-L358">src/SpaceCharge/SpaceChargeConfigBuilder.cpp</a></td><td class="n">1–358</td><td class="n">358</td></tr>
+<tr><td class=""><code>config</code></td><td class=""><a href="https://github.com/OPALX-project/OPALX/blob/b5f495e2760209f3579c8a9375b9f4babbcd579b/src/SpaceCharge/SpaceChargeConfig.h#L1-L121">src/SpaceCharge/SpaceChargeConfig.h</a></td><td class="n">1–121</td><td class="n">121</td></tr>
+<tr><td class=""><code>config_validation</code></td><td class=""><a href="https://github.com/OPALX-project/OPALX/blob/b5f495e2760209f3579c8a9375b9f4babbcd579b/src/SpaceCharge/SpaceChargeConfig.cpp#L1-L243">src/SpaceCharge/SpaceChargeConfig.cpp</a></td><td class="n">1–243</td><td class="n">243</td></tr>
+<tr><td class=""><code>factory</code></td><td class=""><a href="https://github.com/OPALX-project/OPALX/blob/b5f495e2760209f3579c8a9375b9f4babbcd579b/src/SpaceCharge/SpaceChargeFactory.cpp#L1-L55">src/SpaceCharge/SpaceChargeFactory.cpp</a></td><td class="n">1–55</td><td class="n">55</td></tr>
+<tr><td class=""><code>solver</code></td><td class=""><a href="https://github.com/OPALX-project/OPALX/blob/b5f495e2760209f3579c8a9375b9f4babbcd579b/src/SpaceCharge/SpaceChargeSolver.h#L1-L68">src/SpaceCharge/SpaceChargeSolver.h</a></td><td class="n">1–68</td><td class="n">68</td></tr>
+<tr><td class=""><code>algorithm</code></td><td class=""><a href="https://github.com/OPALX-project/OPALX/blob/b5f495e2760209f3579c8a9375b9f4babbcd579b/src/SpaceCharge/SpaceChargeAlgorithm.h#L1-L43">src/SpaceCharge/SpaceChargeAlgorithm.h</a></td><td class="n">1–43</td><td class="n">43</td></tr>
+<tr><td class=""><code>context</code></td><td class=""><a href="https://github.com/OPALX-project/OPALX/blob/b5f495e2760209f3579c8a9375b9f4babbcd579b/src/SpaceCharge/SpaceChargeSolveContext.h#L1-L57">src/SpaceCharge/SpaceChargeSolveContext.h</a></td><td class="n">1–57</td><td class="n">57</td></tr>
+<tr><td class=""><code>context_cpp</code></td><td class=""><a href="https://github.com/OPALX-project/OPALX/blob/b5f495e2760209f3579c8a9375b9f4babbcd579b/src/SpaceCharge/SpaceChargeSolveContext.cpp#L1-L31">src/SpaceCharge/SpaceChargeSolveContext.cpp</a></td><td class="n">1–31</td><td class="n">31</td></tr>
+<tr><td class=""><code>track_setup</code></td><td class=""><a href="https://github.com/OPALX-project/OPALX/blob/b5f495e2760209f3579c8a9375b9f4babbcd579b/src/Track/TrackRun.cpp#L436-L562">src/Track/TrackRun.cpp</a></td><td class="n">436–562</td><td class="n">127</td></tr>
+<tr><td class=""><code>track_lifetime</code></td><td class=""><a href="https://github.com/OPALX-project/OPALX/blob/b5f495e2760209f3579c8a9375b9f4babbcd579b/src/Track/TrackRun.cpp#L275-L282">src/Track/TrackRun.cpp</a></td><td class="n">275–282</td><td class="n">8</td></tr>
+<tr><td class=""><code>track_header</code></td><td class=""><a href="https://github.com/OPALX-project/OPALX/blob/b5f495e2760209f3579c8a9375b9f4babbcd579b/src/Track/TrackRun.h#L95-L126">src/Track/TrackRun.h</a></td><td class="n">95–126</td><td class="n">32</td></tr>
+<tr><td class=""><code>tracker_header</code></td><td class=""><a href="https://github.com/OPALX-project/OPALX/blob/b5f495e2760209f3579c8a9375b9f4babbcd579b/src/Algorithms/ParallelTracker.h#L169-L244">src/Algorithms/ParallelTracker.h</a></td><td class="n">169–244</td><td class="n">76</td></tr>
+<tr><td class=""><code>tracker_call</code></td><td class=""><a href="https://github.com/OPALX-project/OPALX/blob/b5f495e2760209f3579c8a9375b9f4babbcd579b/src/Algorithms/ParallelTracker.cpp#L1265-L1315">src/Algorithms/ParallelTracker.cpp</a></td><td class="n">1265–1315</td><td class="n">51</td></tr>
+<tr><td class=""><code>pic_header</code></td><td class=""><a href="https://github.com/OPALX-project/OPALX/blob/b5f495e2760209f3579c8a9375b9f4babbcd579b/src/SpaceCharge/CartesianPIC3D/CartesianPIC3DAlgorithm.h#L1-L133">src/SpaceCharge/CartesianPIC3D/CartesianPIC3DAlgorithm.h</a></td><td class="n">1–133</td><td class="n">133</td></tr>
+<tr><td class=""><code>pic</code></td><td class=""><a href="https://github.com/OPALX-project/OPALX/blob/b5f495e2760209f3579c8a9375b9f4babbcd579b/src/SpaceCharge/CartesianPIC3D/CartesianPIC3DAlgorithm.cpp#L1-L447">src/SpaceCharge/CartesianPIC3D/CartesianPIC3DAlgorithm.cpp</a></td><td class="n">1–447</td><td class="n">447</td></tr>
+<tr><td class=""><code>fields</code></td><td class=""><a href="https://github.com/OPALX-project/OPALX/blob/b5f495e2760209f3579c8a9375b9f4babbcd579b/src/SpaceCharge/CartesianPIC3D/CartesianPIC3DFieldStorage.h#L1-L118">src/SpaceCharge/CartesianPIC3D/CartesianPIC3DFieldStorage.h</a></td><td class="n">1–118</td><td class="n">118</td></tr>
+<tr><td class=""><code>frames</code></td><td class=""><a href="https://github.com/OPALX-project/OPALX/blob/b5f495e2760209f3579c8a9375b9f4babbcd579b/src/SpaceCharge/SpaceChargeFrames.h#L1-L43">src/SpaceCharge/SpaceChargeFrames.h</a></td><td class="n">1–43</td><td class="n">43</td></tr>
+<tr><td class=""><code>config_test</code></td><td class=""><a href="https://github.com/OPALX-project/OPALX/blob/b5f495e2760209f3579c8a9375b9f4babbcd579b/unit_tests/SpaceCharge/TestSpaceChargeConfig.cpp#L1-L193">unit_tests/SpaceCharge/TestSpaceChargeConfig.cpp</a></td><td class="n">1–193</td><td class="n">193</td></tr>
+<tr><td class=""><code>solver_test</code></td><td class=""><a href="https://github.com/OPALX-project/OPALX/blob/b5f495e2760209f3579c8a9375b9f4babbcd579b/unit_tests/SpaceCharge/TestSpaceChargeSolver.cpp#L1-L76">unit_tests/SpaceCharge/TestSpaceChargeSolver.cpp</a></td><td class="n">1–76</td><td class="n">76</td></tr>
+</tbody></table></div>
+</main>
+</body>
+</html>

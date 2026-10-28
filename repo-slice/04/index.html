@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Training multi-topic answers directly">
+<meta name="idea" content="Add composition rows to 02: broad questions over 2–4 related topics whose answer is the topics&#x27; mechanism paragraphs joined verbatim, to teach answering questions that span several topics.">
+<meta name="upshot" content="Does not help: compositions stay at 0 of 9 and single-topic questions get slightly worse. The demo coverage gain (0.23 → 0.60) comes from copying training compositions that overlap with the demo.">
+<meta name="updated" content="2026-10-28">
+<title>Experiment 04: Training multi-topic answers directly</title>
+<style>
+:root { color-scheme:light; --fg:#1f1f1f; --muted:#5f5f5f; --faint:#8a8a8a; --rule:#1f1f1f; --hair:#dcdcdc; --link:#1d4f91; --panel:#f7f7f5; }
+* { box-sizing:border-box; }
+body { margin:0; background:#fff; color:var(--fg); font:16px/1.6 Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif; }
+main { max-width:900px; margin:0 auto; padding:28px 16px 80px; }
+a { color:var(--link); }
+.crumb { font-size:14px; color:var(--muted); margin-bottom:18px; }
+h1 { font-weight:normal; font-size:32px; margin:0; letter-spacing:.01em; }
+.sub { color:var(--muted); font-style:italic; margin:2px 0 14px; }
+nav.toc { font-size:14px; border-top:1px solid var(--hair); border-bottom:1px solid var(--hair); padding:6px 0; margin-bottom:8px; }
+nav.toc a { margin-right:18px; text-decoration:none; } nav.toc a:hover { text-decoration:underline; }
+h2 { font-weight:normal; font-size:24px; margin:40px 0 6px; border-bottom:1.5px solid var(--rule); padding-bottom:3px; }
+h2 .num { color:var(--muted); margin-right:10px; }
+h3 { font-weight:normal; font-style:italic; font-size:18px; margin:22px 0 4px; }
+p { margin:6px 0 12px; max-width:80ch; }
+ul { max-width:80ch; padding-left:22px; } li { margin:3px 0; }
+.note { color:var(--muted); font-size:14px; }
+code { font-family:ui-monospace, Menlo, Consolas, monospace; font-size:13.5px; background:var(--panel); padding:0 3px; }
+dl.defs { display:grid; grid-template-columns:max-content 1fr; gap:4px 16px; font-size:15.5px; margin:8px 0 16px; }
+dl.defs dt { font-variant:small-caps; letter-spacing:.04em; color:var(--muted); }
+dl.defs dd { margin:0; }
+.tw { overflow-x:auto; margin:10px 0 6px; }
+table { border-collapse:collapse; width:100%; font-size:14.5px; border-top:1.5px solid var(--rule); border-bottom:1.5px solid var(--rule); }
+caption { caption-side:top; text-align:left; font-size:14px; color:var(--muted); padding-bottom:6px; }
+caption b { color:var(--fg); font-weight:normal; font-variant:small-caps; letter-spacing:.04em; }
+th { font-weight:normal; font-variant:small-caps; letter-spacing:.04em; color:var(--muted); text-align:left; padding:5px 10px; border-bottom:.75px solid var(--rule); white-space:nowrap; }
+td { padding:5px 10px; vertical-align:top; border-bottom:1px solid #f0f0f0; }
+tbody tr:last-child td { border-bottom:none; }
+td.n, th.n { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+tr.best td { font-weight:bold; }
+figure { margin:14px 0 18px; }
+figure img { max-width:100%; height:auto; border:1px solid var(--hair); }
+figcaption { font-size:14px; color:var(--muted); margin-top:4px; max-width:80ch; }
+.expl { font-size:15px; margin-top:4px; }
+.box { background:var(--panel); border-left:3px solid var(--rule); padding:8px 14px; margin:10px 0 14px; max-width:80ch; }
+.box p { margin:4px 0; }
+pre { background:var(--panel); padding:10px 12px; overflow-x:auto; font-size:13px; line-height:1.45; }
+pre code { background:none; padding:0; }
+.readme table { width:auto; }
+.readme td, .readme th { white-space:normal; }
+</style>
+</head>
+<body>
+<main>
+<div class="crumb"><a href="../../">Finetuning an OPALX expert</a> &rsaquo; Tests with OPALX repo slice &rsaquo; experiment 04</div>
+<h1>Experiment 04: Training multi-topic answers directly</h1>
+<p class="sub">Tests with OPALX repo slice &middot; field-solver / space-charge slice, 39 topics, judged by Claude Opus 5.5 against required and forbidden claims (<a href="../README.html">README</a>, <a href="../sources.html">source files</a>)</p>
+<nav class="toc"><a href="#summary">Summary</a><a href="#setup">Setup</a><a href="#hypothesis">Hypothesis</a><a href="#results">Results</a><a href="#conclusion">Conclusion</a></nav>
+
+<h2 id="summary"><span class="num">1</span>Summary</h2>
+<dl class="defs"><dt>Idea</dt><dd>Add composition rows to 02: broad questions over 2–4 related topics whose answer is the topics' <code>mechanism</code> paragraphs joined verbatim, to teach answering questions that span several topics.</dd><dt>Upshot</dt><dd>Does not help: compositions stay at 0 of 9 and single-topic questions get slightly worse. The demo coverage gain (0.23 &rarr; 0.60) comes from copying training compositions that overlap with the demo.</dd></dl>
+
+<h2 id="setup"><span class="num">2</span>Setup</h2>
+<dl class="defs"><dt>Model</dt><dd><code>unsloth/Qwen3-8B-unsloth-bnb-4bit</code> (Qwen3-8B, 4-bit), LoRA r&nbsp;=&nbsp;32, &alpha;&nbsp;=&nbsp;32, dropout 0, on all seven projections (q, k, v, o, gate, up, down); AdamW 8-bit, lr 1e-4 linear, 6 warmup steps, batch 8, weight decay 0.001, max sequence length 2048, seed 3407, loss on the answer tokens only</dd><dt>Configurations</dt><dd>Alpaca format, <code>config.yaml</code> as 02: 8 epochs, 77 steps per epoch, 616 steps, checkpoint every 78 steps.</dd><dt>Training data</dt><dd>All 468 rows of 02 unchanged, plus 144 composition rows: 36 hand-picked groups of 2–4 related topics (<code>experiments/04/compositions.py</code>) &times; 4 hand-written questions. Answer = the group's <code>mechanism</code> answers joined verbatim, no new text. Groups whose topic set equals that of an eval, test or demo question were removed (3 of 39). 612 rows, 75 distinct answers; mean composition answer 223 words, so the answer tokens per epoch almost double.</dd></dl>
+
+<h2 id="hypothesis"><span class="num">3</span>Hypothesis</h2>
+<p>02 explains single topics well but fails on questions that span several topics. Training multi-topic answers directly, without new facts, should teach the model to answer a broad question with several fitting paragraphs. Then the eval compositions and the demo briefings improve while the single-topic questions stay at 02's level. Not a matched-budget ablation, and the groups were written after looking at the eval failures.</p>
+
+<h2 id="results"><span class="num">4</span>Results</h2>
+<div class="tw"><table><caption><b>Eval split, 48 questions</b></caption><thead><tr><th class="">checkpoint</th><th class="n">fully correct</th><th class="n">single-topic correct</th><th class="n">mean claim coverage</th><th class="n">composition coverage</th><th class="n">material errors</th></tr></thead><tbody>
+<tr class=""><td class="">78</td><td class="n">4/48 (8%)</td><td class="n">4/39 (10%)</td><td class="n">0.137</td><td class="n">0.04</td><td class="n">36/48 (75%)</td></tr>
+<tr class=""><td class="">156</td><td class="n">17/48 (35%)</td><td class="n">17/39 (44%)</td><td class="n">0.398</td><td class="n">0.17</td><td class="n">5/48 (10%)</td></tr>
+<tr class=""><td class="">234</td><td class="n">27/48 (56%)</td><td class="n">27/39 (69%)</td><td class="n">0.642</td><td class="n">0.35</td><td class="n">2/48 (4%)</td></tr>
+<tr class=""><td class="">312</td><td class="n">34/48 (71%)</td><td class="n">34/39 (87%)</td><td class="n">0.807</td><td class="n">0.34</td><td class="n">2/48 (4%)</td></tr>
+<tr class=""><td class="">390</td><td class="n">35/48 (73%)</td><td class="n">35/39 (90%)</td><td class="n">0.786</td><td class="n">0.23</td><td class="n">0/48 (0%)</td></tr>
+<tr class=""><td class="">468</td><td class="n">34/48 (71%)</td><td class="n">34/39 (87%)</td><td class="n">0.760</td><td class="n">0.20</td><td class="n">0/48 (0%)</td></tr>
+<tr class="best"><td class="">546 (best)</td><td class="n">36/48 (75%)</td><td class="n">36/39 (92%)</td><td class="n">0.802</td><td class="n">0.20</td><td class="n">0/48 (0%)</td></tr>
+<tr class=""><td class="">616</td><td class="n">36/48 (75%)</td><td class="n">36/39 (92%)</td><td class="n">0.802</td><td class="n">0.20</td><td class="n">0/48 (0%)</td></tr>
+</tbody></table></div><div class="tw"><table><caption><b>Demo split, 6 broad agent briefings (best checkpoint)</b></caption><thead><tr><th class="">experiment</th><th class="n">checkpoint</th><th class="n">fully correct</th><th class="n">mean claim coverage</th></tr></thead><tbody>
+<tr><td class=""><a href="../02/">02</a></td><td class="n">312</td><td class="n">0/6</td><td class="n">0.233</td></tr>
+<tr><td class="">04</td><td class="n">468</td><td class="n">0/6</td><td class="n">0.600</td></tr>
+</tbody></table></div><figure><img src="04_241173_judge_eval_by_task_type.png" alt="Fully correct per checkpoint, single-topic vs composition questions."><figcaption>Fully correct per checkpoint, single-topic vs composition questions.</figcaption></figure>
+<p class="expl">Compositions stay at 0 at every checkpoint. Their claim coverage peaks at 0.35 at checkpoints 234–312, as in 02, and then drops to 0.20 as the model falls back to one memorized paragraph. Single-topic questions reach 36/39 (02: 39/39).</p><figure><img src="04_241173_judge_demo.png" alt="Judge scores per checkpoint on the demo split."><figcaption>Judge scores per checkpoint on the demo split.</figcaption></figure>
+<p class="expl">The demo coverage rises to 0.60, but 5 of the 6 best demo answers are verbatim copies of one training composition.</p>
+
+<h2 id="conclusion"><span class="num">5</span>Conclusion</h2>
+<p>It does not help: the 9 eval compositions are all still wrong, and the model gets worse on single-topic questions. Two of the new single-topic failures are topic mix-ups (eval-005 gets the <code>cg_recognized</code> answer, eval-022 the <code>p3m_short_range</code> answer): seeing each paragraph inside 1–5 groups seems to blur which topic a question is about. The demo gain comes from looking up stored answers, not from composing new ones. The exclusion rule only removed groups whose topic set equals a benchmark question's, so groups fitting inside the 5–7 topics of a demo question stayed in and cover most of its topics. The demo is contaminated for 04. Every eval composition answer is a single training paragraph, often of a topic that is not in the question.</p><p>Next steps: a demo set written without seeing the groups, and a metric for the share of answers that copy a training answer verbatim.</p>
+<p class="note">Related: <a href="../02/">experiment 02</a> (the base data) &middot; <a href="../05/">experiment 05</a> (can the model compose facts at all?) &middot; <a href="../07/">experiment 07</a> (chain of thought for compositions)</p>
+
+</main>
+</body>
+</html>

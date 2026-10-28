@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="One answer per topic, more question wordings">
+<meta name="idea" content="Give every question about a topic the same mechanism answer and add four new question wordings per topic, so the model maps many phrasings onto one answer.">
+<meta name="upshot" content="81% fully correct on eval, all 39 single-topic questions right, but 0 of 9 compositions: the adapter recognizes the topic and recites its paragraph.">
+<meta name="updated" content="2026-10-28">
+<title>Experiment 02: One answer per topic, more question wordings</title>
+<style>
+:root { color-scheme:light; --fg:#1f1f1f; --muted:#5f5f5f; --faint:#8a8a8a; --rule:#1f1f1f; --hair:#dcdcdc; --link:#1d4f91; --panel:#f7f7f5; }
+* { box-sizing:border-box; }
+body { margin:0; background:#fff; color:var(--fg); font:16px/1.6 Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif; }
+main { max-width:900px; margin:0 auto; padding:28px 16px 80px; }
+a { color:var(--link); }
+.crumb { font-size:14px; color:var(--muted); margin-bottom:18px; }
+h1 { font-weight:normal; font-size:32px; margin:0; letter-spacing:.01em; }
+.sub { color:var(--muted); font-style:italic; margin:2px 0 14px; }
+nav.toc { font-size:14px; border-top:1px solid var(--hair); border-bottom:1px solid var(--hair); padding:6px 0; margin-bottom:8px; }
+nav.toc a { margin-right:18px; text-decoration:none; } nav.toc a:hover { text-decoration:underline; }
+h2 { font-weight:normal; font-size:24px; margin:40px 0 6px; border-bottom:1.5px solid var(--rule); padding-bottom:3px; }
+h2 .num { color:var(--muted); margin-right:10px; }
+h3 { font-weight:normal; font-style:italic; font-size:18px; margin:22px 0 4px; }
+p { margin:6px 0 12px; max-width:80ch; }
+ul { max-width:80ch; padding-left:22px; } li { margin:3px 0; }
+.note { color:var(--muted); font-size:14px; }
+code { font-family:ui-monospace, Menlo, Consolas, monospace; font-size:13.5px; background:var(--panel); padding:0 3px; }
+dl.defs { display:grid; grid-template-columns:max-content 1fr; gap:4px 16px; font-size:15.5px; margin:8px 0 16px; }
+dl.defs dt { font-variant:small-caps; letter-spacing:.04em; color:var(--muted); }
+dl.defs dd { margin:0; }
+.tw { overflow-x:auto; margin:10px 0 6px; }
+table { border-collapse:collapse; width:100%; font-size:14.5px; border-top:1.5px solid var(--rule); border-bottom:1.5px solid var(--rule); }
+caption { caption-side:top; text-align:left; font-size:14px; color:var(--muted); padding-bottom:6px; }
+caption b { color:var(--fg); font-weight:normal; font-variant:small-caps; letter-spacing:.04em; }
+th { font-weight:normal; font-variant:small-caps; letter-spacing:.04em; color:var(--muted); text-align:left; padding:5px 10px; border-bottom:.75px solid var(--rule); white-space:nowrap; }
+td { padding:5px 10px; vertical-align:top; border-bottom:1px solid #f0f0f0; }
+tbody tr:last-child td { border-bottom:none; }
+td.n, th.n { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+tr.best td { font-weight:bold; }
+figure { margin:14px 0 18px; }
+figure img { max-width:100%; height:auto; border:1px solid var(--hair); }
+figcaption { font-size:14px; color:var(--muted); margin-top:4px; max-width:80ch; }
+.expl { font-size:15px; margin-top:4px; }
+.box { background:var(--panel); border-left:3px solid var(--rule); padding:8px 14px; margin:10px 0 14px; max-width:80ch; }
+.box p { margin:4px 0; }
+pre { background:var(--panel); padding:10px 12px; overflow-x:auto; font-size:13px; line-height:1.45; }
+pre code { background:none; padding:0; }
+.readme table { width:auto; }
+.readme td, .readme th { white-space:normal; }
+</style>
+</head>
+<body>
+<main>
+<div class="crumb"><a href="../../">Finetuning an OPALX expert</a> &rsaquo; Tests with OPALX repo slice &rsaquo; experiment 02</div>
+<h1>Experiment 02: One answer per topic, more question wordings</h1>
+<p class="sub">Tests with OPALX repo slice &middot; field-solver / space-charge slice, 39 topics, judged by Claude Opus 5.5 against required and forbidden claims (<a href="../README.html">README</a>, <a href="../sources.html">source files</a>)</p>
+<nav class="toc"><a href="#summary">Summary</a><a href="#setup">Setup</a><a href="#hypothesis">Hypothesis</a><a href="#results">Results</a><a href="#conclusion">Conclusion</a></nav>
+
+<h2 id="summary"><span class="num">1</span>Summary</h2>
+<dl class="defs"><dt>Idea</dt><dd>Give every question about a topic the same <code>mechanism</code> answer and add four new question wordings per topic, so the model maps many phrasings onto one answer.</dd><dt>Upshot</dt><dd>81% fully correct on eval, all 39 single-topic questions right, but 0 of 9 compositions: the adapter recognizes the topic and recites its paragraph.</dd></dl>
+
+<h2 id="setup"><span class="num">2</span>Setup</h2>
+<dl class="defs"><dt>Model</dt><dd><code>unsloth/Qwen3-8B-unsloth-bnb-4bit</code> (Qwen3-8B, 4-bit), LoRA r&nbsp;=&nbsp;32, &alpha;&nbsp;=&nbsp;32, dropout 0, on all seven projections (q, k, v, o, gate, up, down); AdamW 8-bit, lr 1e-4 linear, 6 warmup steps, batch 8, weight decay 0.001, max sequence length 2048, seed 3407, loss on the answer tokens only</dd><dt>Configurations</dt><dd>Alpaca format, <code>config.yaml</code> as in 01: 8 epochs, 472 steps, checkpoint every 78 steps. A variant <code>32B</code> (Qwen3-32B in 8 bit, batch 4 &times; gradient accumulation 2) is defined but has not been run.</dd><dt>Training data</dt><dd>The 8 <code>recall</code> and <code>mechanism</code> questions of 01 per topic, now all paired with the topic's <code>mechanism</code> answer, plus 4 new mechanism questions per topic (<code>data/questions.py</code>); scenarios dropped. 468 rows, 39 distinct answers, each seen 96 times (12 questions &times; 8 epochs), mean answer 74 words.</dd></dl>
+
+<h2 id="hypothesis"><span class="num">3</span>Hypothesis</h2>
+<p>More question diversity per answer should remove the mistakes on eval questions that are worded differently from the training questions.</p>
+
+<h2 id="results"><span class="num">4</span>Results</h2>
+<div class="tw"><table><caption><b>Eval split, 48 questions</b></caption><thead><tr><th class="">checkpoint</th><th class="n">fully correct</th><th class="n">single-topic correct</th><th class="n">mean claim coverage</th><th class="n">composition coverage</th><th class="n">material errors</th></tr></thead><tbody>
+<tr class=""><td class="">78</td><td class="n">4/48 (8%)</td><td class="n">4/39 (10%)</td><td class="n">0.118</td><td class="n">0.04</td><td class="n">37/48 (77%)</td></tr>
+<tr class=""><td class="">156</td><td class="n">22/48 (46%)</td><td class="n">22/39 (56%)</td><td class="n">0.477</td><td class="n">0.10</td><td class="n">7/48 (15%)</td></tr>
+<tr class=""><td class="">234</td><td class="n">32/48 (67%)</td><td class="n">32/39 (82%)</td><td class="n">0.693</td><td class="n">0.14</td><td class="n">3/48 (6%)</td></tr>
+<tr class=""><td class="">312</td><td class="n">37/48 (77%)</td><td class="n">37/39 (95%)</td><td class="n">0.839</td><td class="n">0.36</td><td class="n">0/48 (0%)</td></tr>
+<tr class=""><td class="">390</td><td class="n">39/48 (81%)</td><td class="n">39/39 (100%)</td><td class="n">0.878</td><td class="n">0.35</td><td class="n">1/48 (2%)</td></tr>
+<tr class=""><td class="">468</td><td class="n">38/48 (79%)</td><td class="n">38/39 (97%)</td><td class="n">0.878</td><td class="n">0.35</td><td class="n">2/48 (4%)</td></tr>
+<tr class="best"><td class="">472 (best)</td><td class="n">39/48 (81%)</td><td class="n">39/39 (100%)</td><td class="n">0.885</td><td class="n">0.39</td><td class="n">0/48 (0%)</td></tr>
+</tbody></table></div><div class="tw"><table><caption><b>Demo split, 6 broad agent briefings (best checkpoint)</b></caption><thead><tr><th class="">checkpoint</th><th class="n">fully correct</th><th class="n">mean claim coverage</th><th class="n">material errors</th></tr></thead><tbody>
+<tr><td class="">312</td><td class="n">0/6</td><td class="n">0.233</td><td class="n">0%</td></tr>
+</tbody></table></div><figure><img src="02_241102_judge_eval_by_task_type.png" alt="Fully correct per checkpoint, single-topic vs composition questions."><figcaption>Fully correct per checkpoint, single-topic vs composition questions.</figcaption></figure>
+<p class="expl">Single-topic questions reach 39/39 from checkpoint 390 on. The 9 composition questions stay at 0 at every checkpoint; their claim coverage reaches only 0.39.</p><figure><img src="02_241102_loss.png" alt="Training and eval loss."><figcaption>Training and eval loss.</figcaption></figure>
+<p class="expl">Eval loss is on the same 48 questions and is shown for comparison only; checkpoints are chosen by the judge.</p>
+
+<h2 id="conclusion"><span class="num">5</span>Conclusion</h2>
+<p>02 is far better than 01 (81% vs 29% at 8 epochs). The eval set contains new wordings of 30 of the 39 recall questions, so the gain is not plain memorization of eval answers. A likely explanation: the model no longer has to choose between four differently worded answers per topic and can concentrate on recognizing the topic. That gives a model that recognizes a topic and recites its answer, which does not mean it understands the code, and it fails as soon as a question spans several topics.</p>
+<p class="note">Related: <a href="../03/">experiment 03</a> (which part of the change helps) &middot; <a href="../04/">experiment 04</a> (training compositions directly) &middot; <a href="../05/">experiment 05</a> (does it still read its input?) &middot; <a href="../02b/">experiment 02b</a> (sampling instead of greedy decoding)</p>
+
+</main>
+</body>
+</html>

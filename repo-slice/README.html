@@ -1,0 +1,653 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Repo slice README</title>
+<style>
+:root { color-scheme:light; --fg:#1f1f1f; --muted:#5f5f5f; --faint:#8a8a8a; --rule:#1f1f1f; --hair:#dcdcdc; --link:#1d4f91; --panel:#f7f7f5; }
+* { box-sizing:border-box; }
+body { margin:0; background:#fff; color:var(--fg); font:16px/1.6 Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif; }
+main { max-width:900px; margin:0 auto; padding:28px 16px 80px; }
+a { color:var(--link); }
+.crumb { font-size:14px; color:var(--muted); margin-bottom:18px; }
+h1 { font-weight:normal; font-size:32px; margin:0; letter-spacing:.01em; }
+.sub { color:var(--muted); font-style:italic; margin:2px 0 14px; }
+nav.toc { font-size:14px; border-top:1px solid var(--hair); border-bottom:1px solid var(--hair); padding:6px 0; margin-bottom:8px; }
+nav.toc a { margin-right:18px; text-decoration:none; } nav.toc a:hover { text-decoration:underline; }
+h2 { font-weight:normal; font-size:24px; margin:40px 0 6px; border-bottom:1.5px solid var(--rule); padding-bottom:3px; }
+h2 .num { color:var(--muted); margin-right:10px; }
+h3 { font-weight:normal; font-style:italic; font-size:18px; margin:22px 0 4px; }
+p { margin:6px 0 12px; max-width:80ch; }
+ul { max-width:80ch; padding-left:22px; } li { margin:3px 0; }
+.note { color:var(--muted); font-size:14px; }
+code { font-family:ui-monospace, Menlo, Consolas, monospace; font-size:13.5px; background:var(--panel); padding:0 3px; }
+dl.defs { display:grid; grid-template-columns:max-content 1fr; gap:4px 16px; font-size:15.5px; margin:8px 0 16px; }
+dl.defs dt { font-variant:small-caps; letter-spacing:.04em; color:var(--muted); }
+dl.defs dd { margin:0; }
+.tw { overflow-x:auto; margin:10px 0 6px; }
+table { border-collapse:collapse; width:100%; font-size:14.5px; border-top:1.5px solid var(--rule); border-bottom:1.5px solid var(--rule); }
+caption { caption-side:top; text-align:left; font-size:14px; color:var(--muted); padding-bottom:6px; }
+caption b { color:var(--fg); font-weight:normal; font-variant:small-caps; letter-spacing:.04em; }
+th { font-weight:normal; font-variant:small-caps; letter-spacing:.04em; color:var(--muted); text-align:left; padding:5px 10px; border-bottom:.75px solid var(--rule); white-space:nowrap; }
+td { padding:5px 10px; vertical-align:top; border-bottom:1px solid #f0f0f0; }
+tbody tr:last-child td { border-bottom:none; }
+td.n, th.n { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+tr.best td { font-weight:bold; }
+figure { margin:14px 0 18px; }
+figure img { max-width:100%; height:auto; border:1px solid var(--hair); }
+figcaption { font-size:14px; color:var(--muted); margin-top:4px; max-width:80ch; }
+.expl { font-size:15px; margin-top:4px; }
+.box { background:var(--panel); border-left:3px solid var(--rule); padding:8px 14px; margin:10px 0 14px; max-width:80ch; }
+.box p { margin:4px 0; }
+pre { background:var(--panel); padding:10px 12px; overflow-x:auto; font-size:13px; line-height:1.45; }
+pre code { background:none; padding:0; }
+.readme table { width:auto; }
+.readme td, .readme th { white-space:normal; }
+</style>
+</head>
+<body>
+<main>
+<div class="crumb"><a href="../">Finetuning an OPALX expert</a> &rsaquo; Tests with OPALX repo slice &rsaquo; README</div>
+<h1>OPALX repo slice: README</h1>
+<p class="sub">Data, evaluation splits, judge and experiment list of the repo-slice tests (<code>opalx-lora/repo/README.md</code>)</p>
+<div class="readme"><pre><code>SOURCES = {
+    &quot;command&quot;: (&quot;src/Structure/FieldSolverCmd.cpp&quot;, 1, 242),
+    &quot;builder&quot;: (&quot;src/SpaceCharge/SpaceChargeConfigBuilder.cpp&quot;, 1, None),
+    &quot;config&quot;: (&quot;src/SpaceCharge/SpaceChargeConfig.h&quot;, 1, None),
+    &quot;config_validation&quot;: (&quot;src/SpaceCharge/SpaceChargeConfig.cpp&quot;, 1, None),
+    &quot;factory&quot;: (&quot;src/SpaceCharge/SpaceChargeFactory.cpp&quot;, 1, None),
+    &quot;solver&quot;: (&quot;src/SpaceCharge/SpaceChargeSolver.h&quot;, 1, None),
+    &quot;algorithm&quot;: (&quot;src/SpaceCharge/SpaceChargeAlgorithm.h&quot;, 1, None),
+    &quot;context&quot;: (&quot;src/SpaceCharge/SpaceChargeSolveContext.h&quot;, 1, None),
+    &quot;context_cpp&quot;: (&quot;src/SpaceCharge/SpaceChargeSolveContext.cpp&quot;, 1, None),
+    &quot;track_setup&quot;: (&quot;src/Track/TrackRun.cpp&quot;, 436, 562),
+    &quot;track_lifetime&quot;: (&quot;src/Track/TrackRun.cpp&quot;, 275, 282),
+    &quot;track_header&quot;: (&quot;src/Track/TrackRun.h&quot;, 95, 126),
+    &quot;tracker_header&quot;: (&quot;src/Algorithms/ParallelTracker.h&quot;, 169, 244),
+    &quot;tracker_call&quot;: (&quot;src/Algorithms/ParallelTracker.cpp&quot;, 1265, 1315),
+    &quot;pic_header&quot;: (&quot;src/SpaceCharge/CartesianPIC3D/CartesianPIC3DAlgorithm.h&quot;, 1, None),
+    &quot;pic&quot;: (&quot;src/SpaceCharge/CartesianPIC3D/CartesianPIC3DAlgorithm.cpp&quot;, 1, 447),
+    &quot;fields&quot;: (&quot;src/SpaceCharge/CartesianPIC3D/CartesianPIC3DFieldStorage.h&quot;, 1, None),
+    &quot;frames&quot;: (&quot;src/SpaceCharge/SpaceChargeFrames.h&quot;, 1, None),
+    &quot;config_test&quot;: (&quot;unit_tests/SpaceCharge/TestSpaceChargeConfig.cpp&quot;, 1, None),
+    &quot;solver_test&quot;: (&quot;unit_tests/SpaceCharge/TestSpaceChargeSolver.cpp&quot;, 1, None),
+}</code></pre>
+<p><strong>Training data</strong> (<code>catalog.py</code>,
+<code>questions.py</code>; the composition groups of experiment 04 are
+in <code>experiments/04/compositions.py</code>)</p>
+<table>
+<thead>
+<tr>
+<th>task_type</th>
+<th>What it is</th>
+<th>Topics per question</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>recall</code></td>
+<td>Short factual question with a concise answer; 4 wordings per topic
+share one answer</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>mechanism</code></td>
+<td>"How/why does it work" question with a longer connected explanation
+of the implementation; 4 wordings per topic share one answer</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>scenario</code></td>
+<td>Concrete what-if or contrast situation ("NX is changed after
+building, what happens?"); 2 per topic, each with its own answer</td>
+<td>1</td>
+</tr>
+<tr>
+<td><code>composition</code></td>
+<td>Broad question over a group of related topics, often a concrete
+situation; the answer is the topics' <code>mechanism</code> answers
+joined verbatim. 4 questions per group, sharing one answer (only
+experiment 04, <code>experiments/04/compositions.py</code>)</td>
+<td>2–4</td>
+</tr>
+</tbody>
+</table>
+<p>Composition rows (experiment 04,
+<code>experiments/04/build.py</code>):</p>
+<ol type="1">
+<li>Groups chosen by hand (<code>experiments/04/compositions.py</code>,
+<code>GROUPS</code>): related topics of the catalog, each group with a
+name, a short description of its area (<code>scope</code>) and 2–4
+topics. The groups are not the 39 topics (<code>TOPICS</code> in
+<code>catalog.py</code>): a group combines several of them, a topic can
+be in several groups (each of the 39 is in 1–5). There were also 39
+groups before the benchmark filter (step 2), but the two counts are
+unrelated. Example:
+<code>('borrowed_access', 'borrowed particle resources, per-call activity storage, and migration invalidation', ['algorithm_ownership', 'context_lifetime', 'migration_views'])</code>.</li>
+<li>No overlap with the benchmark: of the 39 groups first written, those
+whose topic set equals the topic set of a multi-topic eval, test or demo
+question were removed (<code>resource_layers</code> = eval-042,
+<code>source_plane_resolution</code>,
+<code>time_dependent_passes</code>; listed in <code>EXCLUDED</code>),
+leaving 36. <code>build.py</code> asserts that no kept group matches
+such a topic set and that no question equals a benchmark question. It
+reads only the benchmark questions and topic sets, never the reference
+answers.</li>
+<li>Answer: for each topic of the group, its <code>mechanism</code>
+answer (read from <code>experiments/02/train.jsonl</code>), joined
+verbatim and in group order with blank lines. No new text, no
+transitions. Individual facts and smaller topic subsets of the benchmark
+combinations do overlap, on purpose.</li>
+<li>Questions: 4 per group (144 in total), written one by one by hand,
+often as a concrete situation, e.g. for <code>setup_snapshot</code>: "A
+command executes successfully, and someone then changes its mesh
+attributes. Explain which configuration is validated, which values the
+running solver sees, and how that solver was connected to tracking."
+They replaced generic templates (<code>STEMS</code>, e.g. "Walk me
+through {scope} in OPALX. ..."); the template version is kept as
+<code>parent_question</code> in the metadata.</li>
+</ol>
+<p><strong>Evaluation</strong> (<code>benchmark.py</code>)</p>
+<table>
+<thead>
+<tr>
+<th>Split</th>
+<th>task_type</th>
+<th style="text-align: right;">Count</th>
+<th>What it is</th>
+<th>Topics per question</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>eval</td>
+<td><code>implementation</code></td>
+<td style="text-align: right;">39</td>
+<td>Direct question about one topic, newly worded; one per topic</td>
+<td>1</td>
+</tr>
+<tr>
+<td>eval</td>
+<td><code>composition</code></td>
+<td style="text-align: right;">9</td>
+<td>Joins facts from several topics into one answer</td>
+<td>8 span 3 topics, 1 spans 4</td>
+</tr>
+<tr>
+<td>test</td>
+<td><code>scenario</code></td>
+<td style="text-align: right;">19</td>
+<td>What-if or contrast situations, mostly applying facts from two
+topics</td>
+<td>1–2</td>
+</tr>
+<tr>
+<td>test</td>
+<td><code>composition</code></td>
+<td style="text-align: right;">5</td>
+<td>Cross-topic composition, like in eval</td>
+<td>1–2</td>
+</tr>
+<tr>
+<td>demo</td>
+<td><code>agent_briefing</code></td>
+<td style="text-align: right;">6</td>
+<td>Broad implementation briefing for the main-agent comparison</td>
+<td>3 span 6 topics, 2 span 5, 1 spans 7</td>
+</tr>
+<tr>
+<td>oracle</td>
+<td><code>composition</code></td>
+<td style="text-align: right;">9</td>
+<td>Context-use regression test: the 9 eval compositions with their
+topics' trained <code>mechanism</code> paragraphs in the input field
+(<code>scripts/build_oracle.py</code>)</td>
+<td>8 span 3 topics, 1 spans 4</td>
+</tr>
+</tbody>
+</table>
+<p><code>data</code>: <strong>frozen evaluation and provenance
+files</strong> Written by Codex from OPALX commit:
+`b5f495e2760209f3579c8a9375b9f4babbcd579b``</p>
+<p>File: eval.jsonl Content: 48 development questions: 39 single-topic
+(one per topic) and 9 composition questions spanning 3–4 topics. Each
+row has id (fs-eval-NNN::eval-NNN::v1), instruction, input (empty),
+reference output, topics, required_claims, forbidden_claims. Used for:
+Checkpoint selection and comparing experiments</p>
+<p>────────────────────────────────────────</p>
+<p>File: eval.alpaca.jsonl Content: The same 48 questions with only
+instruction/input/output Used for: Validation loss during training only,
+never for selection</p>
+<p>────────────────────────────────────────</p>
+<p>File: oracle.jsonl Content: The 9 eval composition questions (same
+ids, references and claims) with the <code>mechanism</code> answers of
+their topics from catalog.py in the input field, in topic order, joined
+with blank lines. Built by <code>python3 scripts/build_oracle.py</code>
+(<code>--check</code> compares) Used for: The context-use regression
+test (see Context-use test below)</p>
+<p>────────────────────────────────────────</p>
+<p>File: test.jsonl Content: 24 final questions (19 scenarios, 5
+compositions, covering 36 topics) in the same schema. Never used in the
+original experiments. Used for: Run once per experiment, at the selected
+checkpoint only</p>
+<p>────────────────────────────────────────</p>
+<p>File: source_seed.jsonl Content: 117 evidence rows: one per training
+topic (fs-&lt;topic_key&gt;) and one per eval/test/demo question
+(fs-eval-NNN, fs-test-NNN, fs-demo-NNN). Each row joins the OPALX source
+excerpts for the topics it lists Used for: The grader and the viewer
+show the source next to each answer; the prefix of a question's id
+before :: is its seed id</p>
+<p>────────────────────────────────────────</p>
+<p>File: evidence/excerpts.jsonl Content: The 20 hand-picked OPALX
+source spans (file, line range, exact text, file and excerpt SHA-256)
+that all topics are based on Used for: Source of truth for grading;
+proves which code the data describes</p>
+<p>────────────────────────────────────────</p>
+<p>File: catalog.py Content: The 39 hand-written topics. Each has 4
+recall questions sharing one answer, 4 mechanism questions sharing one
+answer, and 2 scenario questions, plus its evidence keys Used for:
+Provenance of all training data; not executed here</p>
+<p>────────────────────────────────────────</p>
+<p>File: benchmark.py Content: Hand-written source of the eval, test and
+demo questions, with their required and forbidden claims Used for:
+Provenance of the questions and rubrics; not executed here</p>
+<p>──────────────────────────────────────── File: JUDGE.md (now in
+scripts/) Content: Grading instructions. An answer is fully correct if
+it contains all required claims and no material error; a correct
+conclusion with an invented reason counts as a material error Used for:
+Grading rules sent to the LLM judge (scripts/judge.py, see the Judge
+section) and for human reviewers</p>
+<p>Caveats: - The training data, the questions and the rubrics were all
+written by the same agent from the same source, and nobody reviewed them
+independently. - The eval questions test new wordings and combinations
+of facts that were trained, not unseen code. - Some training sets (from
+E onward) were designed after looking at eval failures, so eval is
+development-informed. Only test.jsonl is truly held out.</p>
+<h2 id="judge">Judge</h2>
+<p><code>scripts/judge.py</code> (called by
+<code>scripts/report.sh</code>) grades all checkpoints of one run in
+<strong>a single call to Claude Opus 5.5</strong>
+(<code>claude -p</code> on the Claude subscription, effort
+<code>high</code> by default). The call contains:</p>
+<ol type="1">
+<li>a short role prompt (expert OPALX reviewer) and
+<code>scripts/JUDGE.md</code> as the grading rules,</li>
+<li>the 20 pinned OPALX source excerpts
+(<code>data/evidence/excerpts.jsonl</code>, commit <code>b5f495e</code>)
+as the source of truth; a copy is written to
+<code>experiments/sources/</code> (gitignored),</li>
+<li>for each of the 48 eval questions: the question, the reference
+answer, the numbered required claims (R1, R2, ...) and forbidden claims
+(F1, ...) from <code>data/eval.jsonl</code>, followed by the fine-tuned
+answer of every checkpoint.</li>
+</ol>
+<p>Blinding: the answers of one question appear under shuffled labels
+(A, B, ...), so the judge does not know which checkpoint wrote which
+answer, and it is told to grade each answer on its own, not relative to
+the others. It never sees base-model answers, checkpoint names, training
+data or hyperparameters. The answers come from greedy decoding with at
+most 768 new tokens (<code>scripts/evaluate.py</code>;
+<code>--temperature</code> samples instead, and <code>--out</code>
+writes the answers to another run folder, as in experiment 02b).</p>
+<p>The output is forced into a JSON schema. <code>judge.py</code>
+rejects the whole response (and writes nothing) unless every (question,
+checkpoint) pair is judged exactly once and every list has one entry per
+claim. One exception: a <code>forbidden_present</code> list that is too
+long but all false (seen once on the demo) is cut to length and listed
+under <code>repairs</code> in the meta file. Before the call,
+<code>judge.py</code> writes
+<code>judgments_&lt;split&gt;.call.json</code> (label seed, checkpoints,
+model, effort, prompt hash); after a rejected response and a fix to
+<code>judge.py</code>,
+<code>judge.py --run &lt;run&gt; --split &lt;split&gt; --from-raw</code>
+evaluates the saved <code>.raw.json</code> again without a new Claude
+call. It refuses if the rebuilt prompt differs from the one sent.</p>
+<h3 id="per-answer-one-row-in-runsexpjobidjudgments_evaljsonl">Per
+answer (one row in
+<code>runs/&lt;exp&gt;/&lt;jobid&gt;/judgments_eval.jsonl</code>)</h3>
+<p>Set by the judge, following <code>JUDGE.md</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>required_met</code></td>
+<td>one true/false per required claim, in order. True only if the answer
+actually conveys the claim; equivalent wording counts, naming a symbol
+without the required relationship does not</td>
+</tr>
+<tr>
+<td><code>forbidden_present</code></td>
+<td>one true/false per forbidden claim. True only if the answer asserts
+that wrong claim; correctly negating it is fine</td>
+</tr>
+<tr>
+<td><code>other_material_error</code></td>
+<td>true for any further materially wrong, unsupported, contradictory or
+overconfident claim about the repository, including an invented reason
+for a correct conclusion</td>
+</tr>
+<tr>
+<td><code>certainty</code></td>
+<td>the judge's confidence in this judgment: <code>high</code>,
+<code>medium</code> or <code>low</code></td>
+</tr>
+<tr>
+<td><code>rationale</code></td>
+<td>short explanation of missing facts and errors</td>
+</tr>
+</tbody>
+</table>
+<p>Derived by <code>judge.py</code> from these fields (no further model
+call):</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Formula</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>material_error</code></td>
+<td><code>any(forbidden_present) or other_material_error</code></td>
+</tr>
+<tr>
+<td><code>fully_correct</code></td>
+<td><code>all(required_met) and not material_error</code>: the primary
+metric</td>
+</tr>
+<tr>
+<td><code>claim_fraction</code></td>
+<td><code>sum(required_met) / len(required_met)</code>: share of
+required claims covered</td>
+</tr>
+</tbody>
+</table>
+<p>Each row also carries <code>step</code>, <code>checkpoint</code>, the
+question's <code>category</code>, <code>task_type</code> and
+<code>topics</code>, <code>finetuned_truncated</code> (the answer hit
+the 768-token limit without ending) and <code>answer_sha256</code>. An
+empty answer meets no claims and has no material error, so it is never
+fully correct.</p>
+<h3 id="per-checkpoint-printed-table-judgments_evalmetajson-plots">Per
+checkpoint (printed table, <code>judgments_eval.meta.json</code>,
+plots)</h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Formula</th>
+<th>Better</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>fully correct</td>
+<td>number (and %) of the 48 answers with
+<code>fully_correct</code></td>
+<td>higher</td>
+</tr>
+<tr>
+<td>mean claim coverage</td>
+<td>mean of <code>claim_fraction</code> over the 48 answers (each
+question weighs the same, regardless of its number of claims)</td>
+<td>higher</td>
+</tr>
+<tr>
+<td>material errors</td>
+<td>number (and %) of answers with <code>material_error</code></td>
+<td>lower</td>
+</tr>
+<tr>
+<td>truncated</td>
+<td>number of answers that hit the token limit</td>
+<td>lower</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Best checkpoint</strong>: most fully correct answers; ties go
+to higher mean claim coverage, then fewer material errors, then the
+earlier step. <code>judge.py</code> and <code>scripts/analyze.py</code>
+use the same rule.</p>
+<p><code>judgments_eval.meta.json</code> also records the model, effort,
+SHA-256 of the prompt, <code>JUDGE.md</code> and the excerpts, token
+usage, and <code>reference_issues</code>: questions whose reference
+answer or claims the judge found to contradict the source. These are
+listed, not removed; decide by hand whether to exclude them from all
+runs.</p>
+<h3
+id="plots-and-summary-scriptsanalyzepy--runsexpjobidplots-including-summarymd">Plots
+and summary (<code>scripts/analyze.py</code> →
+<code>runs/&lt;exp&gt;/&lt;jobid&gt;/plots/</code>, including
+<code>summary.md</code>)</h3>
+<p><code>runs/&lt;exp&gt;/&lt;jobid&gt;/plots/summary.md</code> holds,
+per judged split: an overview at each split's best checkpoint, the
+per-checkpoint table (fully correct, mean claim coverage, material
+errors, truncated, judge certainty), fully correct / claim coverage /
+material errors per checkpoint by <code>task_type</code> and by
+<code>category</code>, a per-question grid sorted by task type (fully
+correct, else claim coverage; E = material error, T = truncated) and the
+reference issues from the meta file.</p>
+<ul>
+<li><code>judge_eval.png</code>: fully correct, mean claim coverage and
+material errors in % per checkpoint.</li>
+<li><code>judge_eval_by_task_type.png</code>: fully correct in % per
+checkpoint, separately for single-topic (<code>implementation</code>, 39
+questions) and <code>composition</code> questions (9).</li>
+<li><code>judge_&lt;split&gt;.png</code> /
+<code>judge_&lt;split&gt;_by_task_type.png</code> for demo, oracle (and
+test, once judged) as well; the task-type plot needs at least two task
+types.</li>
+<li><code>context_use.png</code>: the context-use regression test
+(below), when eval and oracle are judged.</li>
+<li><code>loss.png</code>: training loss and eval loss per step (from
+<code>log_history.json</code>). Both losses cover only the answer tokens
+(the prompt is masked; for plain-text training rows, experiment 06, the
+training loss covers every token), and eval loss is computed on
+<code>data/eval.alpaca.jsonl</code>, i.e. the same 48 questions. Eval
+loss is shown for comparison only; checkpoints are chosen by the judge
+metrics.</li>
+</ul>
+<h3 id="demo-split">Demo split</h3>
+<p>The 6 <code>agent_briefing</code> questions in
+<code>data/demo.jsonl</code> have the same schema (required/forbidden
+claims), so they get the same metrics (fully correct, mean claim
+coverage, material errors) and <code>plots/judge_demo.png</code>.
+<code>evaluate.py</code> and <code>judge.py</code> take one or more
+splits with <code>--split</code> and default to
+<code>eval demo oracle</code>; <code>analyze.py</code> defaults to every
+split that has a judgments file (eval, demo, oracle, test):</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> scripts/evaluate.py <span class="at">--adapter</span> runs/03/<span class="op">&lt;</span>jobid<span class="op">&gt;</span> --checkpoint all   <span class="co"># GPU node, eval + demo + oracle</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> scripts/judge.py <span class="at">--run</span> runs/03/<span class="op">&lt;</span>jobid<span class="op">&gt;</span>                           <span class="co"># one Claude call per split</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="ex">/usr/bin/python3</span> scripts/analyze.py <span class="at">--run</span> runs/03/<span class="op">&lt;</span>jobid<span class="op">&gt;</span>                <span class="co"># plots + summary.md</span></span></code></pre></div>
+<p><code>judge.py</code> skips a split whose
+<code>judgments_&lt;split&gt;.jsonl</code> exists (pass
+<code>--overwrite</code>) and, by default, skips demo and oracle if they
+have no answers yet; <code>analyze.py</code> reports a missing eval,
+demo or oracle judgments file and goes on with the other splits.
+<code>scripts/submit.sh</code> runs the demo and oracle inference in the
+same job after the eval split, and <code>scripts/report.sh</code> calls
+<code>judge.py</code> and <code>analyze.py</code> once for all splits.
+With 6 questions one answer is about 17 percentage points. The briefings
+are long, so check the <code>truncated</code> column (768-token
+limit).</p>
+<h3 id="context-use-test-oracle-split">Context-use test (oracle
+split)</h3>
+<p>Fine-tuning on short, fixed-format answers can make an adapter recite
+from memory and ignore its input (experiment 05: from about one epoch
+on, 02 ignored paragraphs 2-4 of the input and mostly copied or recited
+paragraph 1). The oracle split checks this for every run. It asks the 9
+eval composition questions again, with the topics' trained paragraphs in
+the input field, so the answer is in the prompt. <code>judge.py</code>
+grades these answers without showing the judge the input (like the
+closed-book eval compositions), and <code>analyze.py</code> compares
+both per checkpoint:</p>
+<ul>
+<li><strong>bonus</strong> = oracle minus closed-book mean claim
+coverage on the same 9 questions, in percentage points: how much the
+adapter still uses its context. Near zero or negative: it ignores the
+input.</li>
+<li><code>plots/context_use.png</code> (coverage closed vs oracle, and
+the bonus) and a "Context use" table in <code>summary.md</code>
+(coverage, bonus, fully correct and material errors for both).</li>
+</ul>
+<p>The two splits come from separate judge calls with the same rules,
+and with 9 questions one claim is about 1-4 points of coverage, so read
+the trend over checkpoints rather than single values. The base model is
+not part of the standard pipeline (<code>evaluate.py</code> caches its
+answers only); experiment 05 judged it once with the oracle input: it
+reads the paragraphs, but runs on into a reasoning continuation and hits
+the token limit on every question, so it is no clean reference. For
+older runs, add the test with
+<code>scripts/evaluate.py --adapter &lt;run&gt; --split oracle --checkpoint all</code>
+(GPU), then <code>scripts/report.sh &lt;run&gt;</code>.</p>
+<h3 id="limits">Limits</h3>
+<ul>
+<li><strong>One judge, one call.</strong> There is no second judge, so
+judge noise is not measured. Rerunning <code>judge.py --overwrite</code>
+gives an estimate of it.</li>
+<li><strong>Small, correlated sample.</strong> 48 questions: one answer
+is about 2 percentage points, and on the 9 composition questions one
+answer is 11 points. Cross-topic questions share topics, so they are not
+independent. Treat small differences between checkpoints as noise.</li>
+<li><strong>Not independent references.</strong> The reference answers
+and claims were written by the same agent as the training data (see
+Caveats above), so the judge checks agreement with that agent, backed by
+the source excerpts. It is not an independent expert review.</li>
+<li><strong>Eval is development-informed.</strong> It is used to choose
+checkpoints and data, so its scores are optimistic. The final number for
+a chosen checkpoint comes from <code>test.jsonl</code>, run once.</li>
+</ul>
+<h2 id="config-variants">Config variants</h2>
+<p>To train the same experiment (same <code>train.jsonl</code>) with
+other settings, put a full config in
+<code>experiments/&lt;NN&gt;/configs/&lt;name&gt;.yaml</code> (same
+format as <code>config.yaml</code>, e.g. an Unsloth Studio export plus
+<code>model</code>/<code>load_in_4bit</code>/<code>load_in_8bit</code>,
+and optionally <code>training.text_eos: true</code>, which appends EOS
+to plain-text rows, and a top-level
+<code>init_adapter: runs/&lt;exp&gt;/&lt;jobid&gt;/checkpoint-&lt;step&gt;</code>,
+which continues training that LoRA adapter instead of a fresh one,
+experiment 07) and pass it with <code>--config</code>:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/submit.sh</span> experiments/02 <span class="at">--config</span> experiments/02/configs/lr2e-4.yaml [sbatch options]</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">scripts/report.sh</span> runs/02/lr2e-4-<span class="op">&lt;</span>jobid<span class="op">&gt;</span></span></code></pre></div>
+<ul>
+<li>The default config is
+<code>experiments/&lt;NN&gt;/config.yaml</code> or
+<code>experiments/&lt;NN&gt;/configs/config.yaml</code> (exactly one of
+them). The run folder is
+<code>runs/&lt;NN&gt;/&lt;name&gt;-&lt;jobid&gt;/</code>; with the
+default config it stays <code>runs/&lt;NN&gt;/&lt;jobid&gt;/</code>
+(config name <code>default</code>). Names: letters, digits,
+<code>.</code>, <code>_</code>, <code>-</code>; not only digits, not
+<code>default</code>.</li>
+<li><code>train.py</code> prints the keys that differ from the default
+config and stores them in <code>resolved_config.yaml</code>
+(<code>config_name</code>, <code>config_file</code>,
+<code>config_diff_vs_default</code>); <code>status.json</code> also
+names the config. <code>evaluate.py</code>, <code>judge.py</code> and
+<code>analyze.py</code> work on the run folder as before; plot titles
+show <code>02/lr2e-4-&lt;jobid&gt;</code>.</li>
+<li>Each variant is a separate training run with its own judge call, so
+compare variants with the judge metrics, keeping the judge noise (±1–2
+answers out of 48) in mind.</li>
+<li>List the variants and what they change in the experiment's
+<code>information.md</code> (<code>**configs**</code> line).</li>
+</ul>
+<h2 id="experiments">Experiments</h2>
+<p><strong>experiment</strong> 01 <strong>format</strong> alpaca
+<strong>modell</strong> Qwen03-8B bnb-4bit <strong>training set</strong>
+original 10x39 question answer pairs</p>
+<hr />
+<p><strong>experiment</strong> 02 <strong>format</strong> alpaca
+<strong>model</strong> Qwen03-8B bnb-4bit <strong>training set</strong>
+contains the original 8x39 (four <code>mechanism</code>, four
+<code>recall</code> formulations) question-answer pairs + 4x39 new
+mechanism instructions paired with that topics <code>mechanism</code>
+answer</p>
+<hr />
+<p><strong>experiment</strong> 02b <strong>format</strong> alpaca
+(inference only) <strong>model</strong> Qwen03-8B bnb-4bit
+<strong>training set</strong> none; all checkpoints of 02 answer eval,
+demo and oracle again with sampling (temperature 0.7, top-p 0.8, top-k
+20, Qwen3's recommendation for non-thinking mode) instead of greedy
+decoding, into <code>runs/02b/t07-241102</code>
+(<code>scripts/evaluate.py --temperature 0.7 --out ...</code>; 02's
+greedy results stay untouched). Tests whether temperature keeps the
+adapter from fixating on its memorized output format so that it uses the
+context in the oracle split (context-use bonus vs 02). Details in
+<code>experiments/02b/information.md</code></p>
+<hr />
+<p><strong>experiment</strong> 03 <strong>format</strong> alpaca
+<strong>model</strong> Qwen03-8B bnb-4bit <strong>training set</strong>
+ablation of 02: the original 8x39 (four <code>mechanism</code>, four
+<code>recall</code> formulations) questions, all paired with that
+topic's <code>mechanism</code> answer, without the 4x39 new questions
+(312 rows, 39 distinct answers). Separates the one-answer-per-topic
+mapping from question diversity; config variant <code>epochs12</code>
+matches 02's 96 exposures per answer</p>
+<hr />
+<p><strong>experiment</strong> 04 <strong>format</strong> alpaca
+<strong>model</strong> Qwen03-8B bnb-4bit <strong>training set</strong>
+all 468 rows of 02 unchanged, plus 144 composition rows (36 groups of
+2–4 topics x 4 hand-written questions); a composition answer is the
+groups' <code>mechanism</code> answers joined verbatim (612 rows, 75
+distinct answers, no new facts). Tests whether training multi-topic
+answers directly fixes 02's failure on multi-topic questions (0/9 eval
+compositions)</p>
+<hr />
+<p><strong>experiment</strong> 05 <strong>format</strong> alpaca
+(inference only) <strong>model</strong> Qwen03-8B bnb-4bit
+<strong>training set</strong> none; the base model and all checkpoints
+of 02 answer the 9 eval composition questions with their topics'
+<code>mechanism</code> paragraphs in the input field (oracle). Showed
+that 02 stops using its input from step 78 on (it learned the output
+format) while the base model uses it; now part of the standard pipeline
+as the <code>oracle</code> split</p>
+<hr />
+<p><strong>experiment</strong> 06 <strong>format</strong> plain text (no
+template, no EOS, loss on every token) <strong>model</strong> Qwen03-8B
+bnb-4bit <strong>training set</strong> 02 without questions: per topic
+the <code>recall</code> and <code>mechanism</code> answers plus 7 recall
+and 3 mechanism rewordings
+(<code>experiments/06/formulations.py</code>), each as one
+<code>{"text": ...}</code> row (468 rows, config as 02). Tests whether
+training without an output format keeps the base model's context use
+while still teaching the facts. Config variant <code>eos</code> (06b,
+<code>configs/eos.yaml</code>): the same rows with an EOS token appended
+to each text, so answers stop instead of running to the token limit</p>
+<hr />
+<p><strong>experiment</strong> 07 <strong>format</strong> native Qwen3
+chat template with thinking
+(<code>{"messages": [user, assistant]}</code> rows,
+<code>scripts/chat_format.py</code>) plus plain-text replay rows
+<strong>model</strong> Qwen03-8B bnb-4bit, continuing the 06 adapter
+(<code>init_adapter: runs/06/241337/checkpoint-312</code>)
+<strong>training set</strong> 320 rows
+(<code>experiments/07/build.py</code>, <code>cot.py</code>):
+chain-of-thought answers (recall the facts per topic in
+<code>&lt;think&gt;</code>, connect them, answer) for single-topic,
+2–3-topic and context questions (relevant + distractor paragraphs, 6
+counterfactual), only on 27 of the 39 topics, plus 78 replay texts of
+06. The 12 held-out topics (<code>cot.HELDOUT</code>, the topics of
+eval-040/043/045/048) test whether the model learned to use stored facts
+in general. Chat-format runs record
+<code>prompt_format: qwen_chat</code> in
+<code>resolved_config.yaml</code>. <code>evaluate.py</code> then builds
+the chat prompt, samples at temperature 0.65 / top-p 0.95 / top-k 20,
+allows 1536 new tokens, and keeps only the text after
+<code>&lt;/think&gt;</code> as <code>finetuned_output</code> for the
+judge. <code>analyze.py</code> adds a held-out vs trained table. Details
+in <code>experiments/07/information.md</code></p>
+</div>
+</main>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Oracle: the needed paragraphs in the input">
+<meta name="idea" content="Put the trained paragraphs needed for each composition question into the input, and test whether the base model and the 02 checkpoints can compose an answer from them. No training.">
+<meta name="upshot" content="The base model uses the paragraphs (coverage 0.82); 02 stops using its input from checkpoint 78 on and recites one memorized paragraph. Fine-tuning damaged the use of context.">
+<meta name="updated" content="2026-10-28">
+<title>Experiment 05: Oracle: the needed paragraphs in the input</title>
+<style>
+:root { color-scheme:light; --fg:#1f1f1f; --muted:#5f5f5f; --faint:#8a8a8a; --rule:#1f1f1f; --hair:#dcdcdc; --link:#1d4f91; --panel:#f7f7f5; }
+* { box-sizing:border-box; }
+body { margin:0; background:#fff; color:var(--fg); font:16px/1.6 Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif; }
+main { max-width:900px; margin:0 auto; padding:28px 16px 80px; }
+a { color:var(--link); }
+.crumb { font-size:14px; color:var(--muted); margin-bottom:18px; }
+h1 { font-weight:normal; font-size:32px; margin:0; letter-spacing:.01em; }
+.sub { color:var(--muted); font-style:italic; margin:2px 0 14px; }
+nav.toc { font-size:14px; border-top:1px solid var(--hair); border-bottom:1px solid var(--hair); padding:6px 0; margin-bottom:8px; }
+nav.toc a { margin-right:18px; text-decoration:none; } nav.toc a:hover { text-decoration:underline; }
+h2 { font-weight:normal; font-size:24px; margin:40px 0 6px; border-bottom:1.5px solid var(--rule); padding-bottom:3px; }
+h2 .num { color:var(--muted); margin-right:10px; }
+h3 { font-weight:normal; font-style:italic; font-size:18px; margin:22px 0 4px; }
+p { margin:6px 0 12px; max-width:80ch; }
+ul { max-width:80ch; padding-left:22px; } li { margin:3px 0; }
+.note { color:var(--muted); font-size:14px; }
+code { font-family:ui-monospace, Menlo, Consolas, monospace; font-size:13.5px; background:var(--panel); padding:0 3px; }
+dl.defs { display:grid; grid-template-columns:max-content 1fr; gap:4px 16px; font-size:15.5px; margin:8px 0 16px; }
+dl.defs dt { font-variant:small-caps; letter-spacing:.04em; color:var(--muted); }
+dl.defs dd { margin:0; }
+.tw { overflow-x:auto; margin:10px 0 6px; }
+table { border-collapse:collapse; width:100%; font-size:14.5px; border-top:1.5px solid var(--rule); border-bottom:1.5px solid var(--rule); }
+caption { caption-side:top; text-align:left; font-size:14px; color:var(--muted); padding-bottom:6px; }
+caption b { color:var(--fg); font-weight:normal; font-variant:small-caps; letter-spacing:.04em; }
+th { font-weight:normal; font-variant:small-caps; letter-spacing:.04em; color:var(--muted); text-align:left; padding:5px 10px; border-bottom:.75px solid var(--rule); white-space:nowrap; }
+td { padding:5px 10px; vertical-align:top; border-bottom:1px solid #f0f0f0; }
+tbody tr:last-child td { border-bottom:none; }
+td.n, th.n { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+tr.best td { font-weight:bold; }
+figure { margin:14px 0 18px; }
+figure img { max-width:100%; height:auto; border:1px solid var(--hair); }
+figcaption { font-size:14px; color:var(--muted); margin-top:4px; max-width:80ch; }
+.expl { font-size:15px; margin-top:4px; }
+.box { background:var(--panel); border-left:3px solid var(--rule); padding:8px 14px; margin:10px 0 14px; max-width:80ch; }
+.box p { margin:4px 0; }
+pre { background:var(--panel); padding:10px 12px; overflow-x:auto; font-size:13px; line-height:1.45; }
+pre code { background:none; padding:0; }
+.readme table { width:auto; }
+.readme td, .readme th { white-space:normal; }
+</style>
+</head>
+<body>
+<main>
+<div class="crumb"><a href="../../">Finetuning an OPALX expert</a> &rsaquo; Tests with OPALX repo slice &rsaquo; experiment 05</div>
+<h1>Experiment 05: Oracle: the needed paragraphs in the input</h1>
+<p class="sub">Tests with OPALX repo slice &middot; field-solver / space-charge slice, 39 topics, judged by Claude Opus 5.5 against required and forbidden claims (<a href="../README.html">README</a>, <a href="../sources.html">source files</a>)</p>
+<nav class="toc"><a href="#summary">Summary</a><a href="#setup">Setup</a><a href="#hypothesis">Hypothesis</a><a href="#results">Results</a><a href="#conclusion">Conclusion</a></nav>
+
+<h2 id="summary"><span class="num">1</span>Summary</h2>
+<dl class="defs"><dt>Idea</dt><dd>Put the trained paragraphs needed for each composition question into the input, and test whether the base model and the 02 checkpoints can compose an answer from them. No training.</dd><dt>Upshot</dt><dd>The base model uses the paragraphs (coverage 0.82); 02 stops using its input from checkpoint 78 on and recites one memorized paragraph. Fine-tuning damaged the use of context.</dd></dl>
+
+<h2 id="setup"><span class="num">2</span>Setup</h2>
+<dl class="defs"><dt>Model</dt><dd>Base model (Qwen3-8B, 4-bit) and every checkpoint of <a href="../02/">experiment 02</a> (<code>runs/02/241102</code>); no new training.</dd><dt>Configurations</dt><dd>Inference as <code>scripts/evaluate.py</code>: frozen Alpaca prompt, greedy, at most 768 new tokens. 02 was trained with an empty input field only, so the filled input is a new prompt shape for the adapter.</dd><dt>Training data</dt><dd>None. The 9 composition questions of the eval split, each with its topics' <code>mechanism</code> paragraphs (verbatim from 02's training data) in the input field (the oracle condition).</dd></dl>
+
+<h2 id="hypothesis"><span class="num">3</span>Hypothesis</h2>
+<p>The model knows the atomic facts. On a question that spans several topics, it has to pick the right sentences from the relevant paragraphs and connect them, but it picks the single nearest paragraph (see <a href="../04/">experiment 04</a>). Recombining facts learned separately inside the weights is a known weak spot of LLMs (two-hop curse, Physics of Language Models 3.1/3.2, reversal curse). Handing the model the facts separates the two possible causes:</p><ul><li>oracle high for base and 02: composing is not the problem, retrieving several facts from the weights is;</li><li>oracle high for base but low for 02: fine-tuning damaged the use of context;</li><li>oracle low for base too: the 8B model cannot compose these answers.</li></ul>
+
+<h2 id="results"><span class="num">4</span>Results</h2>
+<div class="tw"><table><caption><b>Oracle vs closed book, 9 composition questions (closed = 02's own eval judgments)</b></caption><thead><tr><th class="">model</th><th class="n">oracle fully correct</th><th class="n">oracle coverage</th><th class="n">closed fully correct</th><th class="n">closed coverage</th></tr></thead><tbody>
+<tr><td class="">base</td><td class="n">2/9</td><td class="n">0.82</td><td class="n">n/a</td><td class="n">n/a</td></tr>
+<tr><td class="">checkpoint-78</td><td class="n">0/9</td><td class="n">0.21</td><td class="n">0/9</td><td class="n">0.04</td></tr>
+<tr><td class="">checkpoint-156</td><td class="n">0/9</td><td class="n">0.43</td><td class="n">0/9</td><td class="n">0.10</td></tr>
+<tr><td class="">checkpoint-234</td><td class="n">2/9</td><td class="n">0.39</td><td class="n">0/9</td><td class="n">0.14</td></tr>
+<tr><td class="">checkpoint-312</td><td class="n">1/9</td><td class="n">0.40</td><td class="n">0/9</td><td class="n">0.36</td></tr>
+<tr><td class="">checkpoint-390</td><td class="n">1/9</td><td class="n">0.40</td><td class="n">0/9</td><td class="n">0.35</td></tr>
+<tr><td class="">checkpoint-468</td><td class="n">0/9</td><td class="n">0.36</td><td class="n">0/9</td><td class="n">0.35</td></tr>
+<tr><td class="">checkpoint-472</td><td class="n">0/9</td><td class="n">0.36</td><td class="n">0/9</td><td class="n">0.39</td></tr>
+</tbody></table></div><p class="expl">The base model runs on into a reasoning continuation and hits the token limit on every question, so it is no clean reference, but it clearly reads the paragraphs.</p><figure><img src="05_241102_oracle_vs_closed.png" alt="Fully correct, claim coverage and material errors per model, closed book vs oracle."><figcaption>Fully correct, claim coverage and material errors per model, closed book vs oracle.</figcaption></figure>
+<p class="expl">Already at checkpoint 78 the adapter's oracle coverage drops from the base model's 0.82 to 0.21. Later it recovers to about 0.40, but only because the memorized paragraphs it recites overlap with the answers.</p><figure><img src="05_241102_oracle_by_question.png" alt="Claim coverage per composition question: base with oracle, 02 checkpoint 234 with and without oracle."><figcaption>Claim coverage per composition question: base with oracle, 02 checkpoint 234 with and without oracle.</figcaption></figure>
+<p class="expl">With the oracle the base model covers 67–100% of the claims on every question. Checkpoint 234 matches it only on eval-040 and eval-043 and covers 0–33% on the other seven, about what it covers without the input.</p>
+
+<h2 id="conclusion"><span class="num">5</span>Conclusion</h2>
+<p>The fine-tuned model never uses paragraphs 2–4 of the input, while the base model does: it loses the general ability to use its context, which is a big problem for an expert that another agent calls with context. By checkpoint 78 it has learned the output format and stops looking at the input. Then it slowly memorizes the 39 paragraphs and recites them; since the oracle paragraphs are exactly those memorized paragraphs, coverage goes back up. The oracle condition is now part of the standard pipeline (the <code>oracle</code> split and the context-use plot of every run).</p>
+<p class="note">Related: <a href="../02/">experiment 02</a> (the adapter) &middot; <a href="../02b/">experiment 02b</a> (does sampling help?) &middot; <a href="../06/">experiment 06</a> (training without an output format)</p>
+
+</main>
+</body>
+</html>

@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Qwen3 architecture and LoRA</title>
+<style>
+@font-face { font-family:'Latin Modern'; font-style:normal; font-weight:normal; font-display:swap;
+  src:url('https://cdn.jsdelivr.net/npm/latex.css@1.11.0/fonts/LM-regular.woff2') format('woff2'); }
+@font-face { font-family:'Latin Modern'; font-style:italic; font-weight:normal; font-display:swap;
+  src:url('https://cdn.jsdelivr.net/npm/latex.css@1.11.0/fonts/LM-italic.woff2') format('woff2'); }
+@font-face { font-family:'Latin Modern'; font-style:normal; font-weight:bold; font-display:swap;
+  src:url('https://cdn.jsdelivr.net/npm/latex.css@1.11.0/fonts/LM-bold.woff2') format('woff2'); }
+@font-face { font-family:'Latin Modern'; font-style:italic; font-weight:bold; font-display:swap;
+  src:url('https://cdn.jsdelivr.net/npm/latex.css@1.11.0/fonts/LM-bold-italic.woff2') format('woff2'); }
+:root { color-scheme:light; --fg:#000; --muted:#444; --link:#0000ee; }
+* { box-sizing:border-box; }
+body { margin:0; background:#fff; color:var(--fg);
+  font:17px/1.42 'Latin Modern', 'Computer Modern Serif', 'CMU Serif', Georgia, serif; }
+main { max-width:760px; margin:0 auto; padding:28px 16px 80px; }
+a { color:var(--link); text-decoration:none; } a:hover { text-decoration:underline; }
+.crumb { font-size:14px; color:var(--muted); margin-bottom:28px; }
+.crumb a { color:var(--muted); }
+p { margin:0; text-align:justify; hyphens:auto; text-indent:1.5em; }
+h2 + p, h3 + p, header + p, .noindent { text-indent:0; }
+header { text-align:center; margin-bottom:26px; }
+header h1 { font-size:20px; font-weight:bold; margin:0 0 10px; }
+header .author { font-size:17px; }
+mjx-container[display="true"] { margin:.7em 0 !important; overflow-x:auto; overflow-y:hidden; }
+
+
+/* sections: "I. TITLE" bold caps centered; subsections bold centered, unnumbered (secnumdepth=1) */
+h2 { font-size:14.5px; font-weight:bold; text-transform:uppercase; letter-spacing:.02em; text-align:center; margin:28px 0 12px; }
+h3 { font-size:17px; font-weight:bold; text-align:center; margin:22px 0 10px; }
+
+/* floats */
+figure { margin:20px 0; }
+figure .art { text-align:center; overflow-x:auto; }
+figure .art img { max-width:100%; height:auto; }
+figcaption, .tcap { font-size:14.5px; text-align:justify; margin-top:8px; }
+.tcap { text-align:center; margin:0 auto 8px; max-width:640px; }
+.tw { overflow-x:auto; }
+table { border-collapse:collapse; margin:0 auto; font-size:14.5px; border-top:1px solid #000; border-bottom:1px solid #000; }
+thead th { border-bottom:.6px solid #000; font-weight:normal; padding:3px 8px; }
+td { padding:1px 8px; white-space:nowrap; }
+td.r, th.r { text-align:right; font-variant-numeric:tabular-nums; }
+td.l, th.l { text-align:left; }
+tr.mid td { border-top:.6px solid #000; }
+tr.mid + tr td, tr.first td { padding-top:3px; }
+tbody tr:last-child td { padding-bottom:3px; }
+.tnote { font-size:12.5px; max-width:640px; margin:6px auto 0; line-height:1.35; }
+</style>
+<script>
+window.MathJax = {
+  tex: { tags:'ams', inlineMath:[['$','$']], displayMath:[['\\[','\\]']] },
+  chtml: { scale:1.0 }
+};
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-chtml.js"></script>
+</head>
+<body>
+<main>
+<div class="crumb"><a href="../">Finetuning an OPALX expert</a> &rsaquo; Theory &rsaquo; Qwen3 architecture and LoRA</div>
+
+<header>
+  <h1>Qwen3 and LoRA architecture</h1>
+  <div class="author">Maurice Venutti</div>
+</header>
+
+<p>Large foundation models such as&nbsp;[?] are trained on vast datasets containing trillions of tokens across various domains, effectively distilling (almost all recorded) human knowledge and capabilities into their parameters.
+<em>Dense model</em>: every parameter is used for every token. When a token passes through a layer, it goes through the whole FFN. <em>MoE</em> (Mixture of Experts): The single FFN is replaced by smaller FFNs + router. For each token, the router picks experts to use. Attention stays dense.</p>
+
+<h3>Architecture</h3>
+
+<p>Fig.&nbsp;<a href="#fig1">1</a> shows the Qwen3 architecture (dense, decoder-only). Input tokens are mapped by the token embedding ($\sim 151\text{k}$ vocabulary) to vectors of size $d_\text{model}$. These pass through $N$ identical decoder blocks (8B: 36, 32B: 64). Each block has two parts: grouped query attention and a SwiGLU feed forward network. Both get an RMSNorm before them and a residual connection ($+$) around them. After the last block a final RMSNorm is applied, and the LM head maps each hidden state to next-token logits over the vocabulary. Throughout this report we use the 8B model, so $d_\text{model} = 4096$.</p>
+
+<figure id="fig1">
+  <div class="art"><img src="figures/qwen3-architecture.svg" alt="Qwen3 model overview: input tokens, token embedding, N decoder blocks, final RMSNorm, LM head, next-token logits; a decoder block is RMSNorm, grouped query attention, residual add, RMSNorm, SwiGLU feed forward, residual add." width="500"></div>
+  <figcaption>FIG. 1. Qwen3 model overview (left) and a single decoder block (right).</figcaption>
+</figure>
+
+<h3>Grouped Query Attention</h3>
+
+<figure id="fig2">
+  <div class="art"><img src="figures/gqa.svg" alt="Grouped query attention: the normalized hidden state goes to Q, K and V projections; Q and K get QK-Norm and RoPE; causal grouped query attention; output projection." width="560"></div>
+  <figcaption>FIG. 2. Grouped query attention in Qwen3. Numbers are for the 8B model (Q heads: 32 for 8B, 64 for 32B).</figcaption>
+</figure>
+
+<p>The input is
+\[
+  X \in \mathbb{R}^{n \times d_\text{model}} =
+  \begin{pmatrix} x_0 \\ \vdots \\ x_{n-1} \end{pmatrix},
+  \qquad x_m \in \mathbb{R}^{d_\text{model}},
+  \tag{1}
+\]
+where $n$ is the number of tokens of the input sequence.
+First, an RMS-Norm is applied,
+\[
+  \tilde{x}_m = \frac{x_m}{\sqrt{\frac{1}{d_\text{model}}\sum_{i=1}^{d_\text{model}} x_{m,i}^2 + \epsilon}} \odot \gamma \in \mathbb{R}^{d_\text{model}},
+  \tag{2}
+\]
+where $\epsilon$ is fixed and $\gamma \in \mathbb{R}^{d_\text{model}}$ is learned. Then the linear projections
+\begin{align}
+  Q &= \tilde{X} W_Q \in \mathbb{R}^{n \times (32 \cdot 128)} && \text{(32 heads)}, \tag{3}\\
+  K &= \tilde{X} W_K \in \mathbb{R}^{n \times (8 \cdot 128)} && \text{(8 heads)}, \tag{4}\\
+  V &= \tilde{X} W_V \in \mathbb{R}^{n \times (8 \cdot 128)} && \text{(8 heads)} \tag{5}
+\end{align}
+are computed, so $K$ and $V$ are four times narrower than $Q$.</p>
+
+<p>Next comes QK-Norm. Every 128-dim query and key vector gets RMS norm:
+\[
+  \hat{q}_m^{(h)} = \mathrm{RMSNorm}_{\gamma_q}\bigl(Q_m^{(h)}\bigr), \qquad
+  \hat{k}_m^{(j)} = \mathrm{RMSNorm}_{\gamma_k}\bigl(K_m^{(j)}\bigr),
+  \tag{6}
+\]
+with $Q_m^{(h)} \in \mathbb{R}^{128}$, $h \in \{0, \dots, 31\}$, $j \in \{0, \dots, 7\}$. $\gamma_q$ / $\gamma_k$ are shared across heads. Why? Dot product in attention scores could grow without bound $\rightarrow$ stabilized training.</p>
+
+<p>Then RoPE is applied. For each pair of dimensions (i.e.&nbsp;64) define a frequency
+\[
+  \theta_i = \theta_\text{base}^{-2i/128}, \qquad \theta_\text{base} = 10^{6}, \quad i = 0, \dots, 63.
+  \tag{7}
+\]
+Then rotate the dimension pair $(i, i+64)$ by angle $m\theta_i$ for a token at position $m$:
+\[
+  \begin{pmatrix} a_i' \\ a_{i+64}' \end{pmatrix} =
+  \underbrace{\begin{pmatrix} \cos m\theta_i & -\sin m\theta_i \\ \sin m\theta_i & \cos m\theta_i \end{pmatrix}}_{R_m}
+  \begin{pmatrix} a_i \\ a_{i+64} \end{pmatrix}.
+  \tag{8}
+\]
+Since
+\[
+  (R_m \hat{q})^\top (R_l \hat{k}) = \hat{q}^\top R_{l-m} \hat{k},
+  \tag{9}
+\]
+the attention score depends only on the relative distance $l - m$, not absolute positions.</p>
+
+<p>After that, query heads are mapped to KV heads,
+\[
+  j(h) = \lfloor h/4 \rfloor.
+  \tag{10}
+\]
+The 8 KV heads are repeated $4\times$ to line up with the 32 query heads.</p>
+
+<p>Then the attention score is computed. For $h \in \{0, \dots, 31\}$:
+\[
+  S^{(h)} = \frac{Q'^{(h)} K'^{(j(h))\top}}{\sqrt{128}} \in \mathbb{R}^{n \times n},
+  \tag{11}
+\]
+where $\sqrt{128}$ keeps variance of score near 1. $S_{ml}^{(h)}$ measures how strongly token $m$ attends to $l$. Set $S_{ml}^{(h)} = -\infty$ for $l &gt; m$ so a token can't look at future tokens.
+\[
+  A_{ml}^{(h)} = \frac{\exp\bigl(S_{ml}^{(h)}\bigr)}{\sum_{l' \le m} \exp\bigl(S_{ml'}^{(h)}\bigr)}
+  \tag{12}
+\]
+is a probability distribution over past tokens of $m$, and
+\[
+  O^{(h)} = A^{(h)} V^{(j(h))} \in \mathbb{R}^{n \times 128}.
+  \tag{13}
+\]
+Finally, the heads are concatenated and projected:
+\[
+  O = \bigl[O^{(0)} \,|\, \dots \,|\, O^{(31)}\bigr] \in \mathbb{R}^{n \times (32 \cdot 128)}, \qquad
+  \mathbb{R}^{n \times d_\text{model}} \ni X \leftarrow X + O W_O,
+  \tag{14}
+\]
+with $W_O \in \mathbb{R}^{(32 \cdot 128) \times d_\text{model}}$.</p>
+
+<p>During generation, we compute the next line of $O$ by
+\[
+  O_t^{(h)} = \sum_{l \le t} A_{tl}^{(h)} V_l^{(j(h))}, \qquad
+  A_{tl} = \mathrm{Softmax}\left(\frac{q_t^{(h)} k_l^{(j)}}{\sqrt{128}}\right)
+  \tag{15}
+\]
+<span class="noindent">$\Rightarrow$ cache $K$ and $V$ of past tokens. Thus grouping saves $4\times$ the memory.</span></p>
+
+<h3>Feed forward network</h3>
+
+<p>First, a second RMS Norm with own learned scale $\gamma_\text{ffn}$ is applied. This is followed by a parallel up projection
+\[
+  G = \tilde{X} W_G, \qquad U = \tilde{X} W_U, \qquad W_G, W_U \in \mathbb{R}^{d_\text{model} \times d_\text{ff}},
+  \tag{16}
+\]
+with $d_\text{ff} = 3 d_\text{model}$, and by element-wise gating
+\[
+  H = \mathrm{SiLU}(G) \odot U \in \mathbb{R}^{n \times d_\text{ff}},
+  \qquad \text{with} \quad \mathrm{SiLU}(z) = \frac{z}{1 + e^{-z}}.
+  \tag{17}
+\]
+Finally, the down projection gives
+\[
+  Y = H W_D, \qquad W_D \in \mathbb{R}^{d_\text{ff} \times d_\text{model}}, \qquad X \leftarrow X + Y,
+  \tag{18}
+\]
+\[
+  \mathrm{FFN}(x) = W_D^\top \bigl(\mathrm{SiLU}(W_G^\top x) \odot (W_U^\top x)\bigr).
+  \tag{19}
+\]
+$\rightarrow$ No mixture across tokens $\leftarrow$ once on new token during generation.</p>
+
+<h3>Sampling</h3>
+
+<p>Compute $z_t = \tilde{x}_t W_\text{out}$ for newest position. Reshape distribution and sample from it: first $p_v \propto \exp(z_v / T)$ (during softmax; $T &lt; 1$ sharp, $T &gt; 1$ flatter), then keep $k$-highest, zero out rest (or top-$p$), and finally sample what remains.</p>
+
+<p>Thinking: $T = 0.6$, top-$p$: 0.95, top-$k$: 20. Non-thinking: $T = 0.7$, top-$p$: 0.8, top-$k$: 20.</p>
+
+<figure id="tab1">
+  <div class="tcap">TABLE I. Parameter counts of Qwen3-8B and Qwen3-32B. $H_q$: number of query heads, vocabulary size 151,936.</div>
+  <div class="tw">
+  <table>
+    <thead><tr><th class="l">Component</th><th class="l">Shape</th><th class="r">Qwen3-8B</th><th class="r">Qwen3-32B</th></tr></thead>
+    <tbody>
+      <tr class="first"><td class="l" colspan="4"><em>One decoder block</em></td></tr>
+      <tr><td>Attention RMSNorm $\gamma$</td><td>$d_\text{model}$</td><td class="r">4,096</td><td class="r">5,120</td></tr>
+      <tr><td>$W_Q$</td><td>$d_\text{model} \times (H_q \cdot 128)$</td><td class="r">16,777,216</td><td class="r">41,943,040</td></tr>
+      <tr><td>$W_K$</td><td>$d_\text{model} \times (8 \cdot 128)$</td><td class="r">4,194,304</td><td class="r">5,242,880</td></tr>
+      <tr><td>$W_V$</td><td>$d_\text{model} \times (8 \cdot 128)$</td><td class="r">4,194,304</td><td class="r">5,242,880</td></tr>
+      <tr><td>QK-Norm $\gamma_q$</td><td>$128$</td><td class="r">128</td><td class="r">128</td></tr>
+      <tr><td>QK-Norm $\gamma_k$</td><td>$128$</td><td class="r">128</td><td class="r">128</td></tr>
+      <tr><td>$W_O$</td><td>$(H_q \cdot 128) \times d_\text{model}$</td><td class="r">16,777,216</td><td class="r">41,943,040</td></tr>
+      <tr><td><b>Attention subtotal</b><sup>a</sup></td><td></td><td class="r"><b>41,943,296</b></td><td class="r"><b>94,372,096</b></td></tr>
+      <tr><td>FFN RMSNorm $\gamma$</td><td>$d_\text{model}$</td><td class="r">4,096</td><td class="r">5,120</td></tr>
+      <tr><td>$W_G$ (gate)</td><td>$d_\text{model} \times d_\text{ff}$</td><td class="r">50,331,648</td><td class="r">131,072,000</td></tr>
+      <tr><td>$W_U$ (up)</td><td>$d_\text{model} \times d_\text{ff}$</td><td class="r">50,331,648</td><td class="r">131,072,000</td></tr>
+      <tr><td>$W_D$ (down)</td><td>$d_\text{ff} \times d_\text{model}$</td><td class="r">50,331,648</td><td class="r">131,072,000</td></tr>
+      <tr><td><b>FFN subtotal</b><sup>a</sup></td><td></td><td class="r"><b>150,994,944</b></td><td class="r"><b>393,216,000</b></td></tr>
+      <tr><td><b>One block total</b></td><td></td><td class="r"><b>192,946,432</b></td><td class="r"><b>487,598,336</b></td></tr>
+      <tr class="mid"><td class="l" colspan="4"><em>Whole model</em></td></tr>
+      <tr><td>Token embedding</td><td>$151{,}936 \times d_\text{model}$</td><td class="r">622,329,856</td><td class="r">777,912,320</td></tr>
+      <tr><td>All blocks: attention<sup>a</sup></td><td></td><td class="r">1,509,958,656</td><td class="r">6,039,814,144</td></tr>
+      <tr><td>All blocks: FFN<sup>a</sup></td><td></td><td class="r">5,435,817,984</td><td class="r">25,165,824,000</td></tr>
+      <tr><td>All blocks: RMSNorm $\gamma$</td><td></td><td class="r">294,912</td><td class="r">655,360</td></tr>
+      <tr><td>Final RMSNorm</td><td>$d_\text{model}$</td><td class="r">4,096</td><td class="r">5,120</td></tr>
+      <tr><td>LM head (untied)</td><td>$d_\text{model} \times 151{,}936$</td><td class="r">622,329,856</td><td class="r">777,912,320</td></tr>
+      <tr><td><b>Total</b></td><td></td><td class="r"><b>8,190,735,360</b> $\approx$ <b>8.19B</b></td><td class="r"><b>32,762,123,264</b> $\approx$ <b>32.76B</b></td></tr>
+      <tr><td>Non-embedding<sup>b</sup></td><td></td><td class="r">6,946,075,648 $\approx$ 6.95B</td><td class="r">31,206,298,624 $\approx$ 31.21B</td></tr>
+      <tr class="mid"><td class="l" colspan="4"><em>Share of total</em></td></tr>
+      <tr><td>FFN</td><td></td><td class="r">66.4%</td><td class="r">76.8%</td></tr>
+      <tr><td>Attention</td><td></td><td class="r">18.4%</td><td class="r">18.4%</td></tr>
+      <tr><td>Embedding + LM head</td><td></td><td class="r">15.2%</td><td class="r">4.7%</td></tr>
+      <tr><td>All norms</td><td></td><td class="r">$&lt;0.01\%$</td><td class="r">$&lt;0.01\%$</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="tnote"><sup>a</sup>&thinsp;Without the RMSNorm $\gamma$ (counted separately); attention includes QK-Norm. &emsp;
+  <sup>b</sup>&thinsp;Total minus embedding and LM head.<br>
+  Layers: 36 (8B), 64 (32B); $d_\text{model}$: 4,096 (8B), 5,120 (32B); $H_q$: 32 (8B), 64 (32B); $d_\text{ff}$: 12,288 (8B), 25,600 (32B).</div>
+</figure>
+
+<h3>LoRA</h3>
+
+<p>Each linear projection (seven per decoder block) in every block gets an adapter. (RMSNorm, QK-Norm scales, embedding and LM head frozen (used to read new tokens).)</p>
+
+<p>Example: see Fig.&nbsp;<a href="#fig3">3</a>.</p>
+
+<figure id="fig3">
+  <div class="art"><img src="figures/lora.svg" alt="LoRA adapter: input x goes through the frozen weight W and in parallel through A (d_model by r) and B (r by d_ff), scaled by alpha over r; both paths are added to give the output h." width="520"></div>
+  <figcaption>FIG. 3. LoRA adapter on a linear projection.</figcaption>
+</figure>
+
+<p>Each adapter adds $r \cdot (d_\text{in} + d_\text{out})$.</p>
+
+<p>For Qwen3-8B at $r = 16$ this gives Table&nbsp;<a href="#tab2">II</a>, and across ranks, with all seven targets, Table&nbsp;<a href="#tab3">III</a>.</p>
+
+<figure id="tab2">
+  <div class="tcap">TABLE II. LoRA parameters per layer for Qwen3-8B at $r = 16$.</div>
+  <div class="tw">
+  <table>
+    <thead><tr><th class="l">Matrix</th><th class="l">Shape</th><th class="r">LoRA params per layer ($r = 16$)</th></tr></thead>
+    <tbody>
+      <tr class="first"><td>$W_Q$</td><td>$4096 \to 4096$</td><td class="r">131,072</td></tr>
+      <tr><td>$W_K$</td><td>$4096 \to 1024$</td><td class="r">81,920</td></tr>
+      <tr><td>$W_V$</td><td>$4096 \to 1024$</td><td class="r">81,920</td></tr>
+      <tr><td>$W_O$</td><td>$4096 \to 4096$</td><td class="r">131,072</td></tr>
+      <tr><td>$W_G$ (gate)</td><td>$4096 \to 12{,}288$</td><td class="r">262,144</td></tr>
+      <tr><td>$W_U$ (up)</td><td>$4096 \to 12{,}288$</td><td class="r">262,144</td></tr>
+      <tr><td>$W_D$ (down)</td><td>$12{,}288 \to 4096$</td><td class="r">262,144</td></tr>
+      <tr class="mid"><td><b>Per layer</b></td><td></td><td class="r"><b>1,212,416</b></td></tr>
+      <tr><td><b>$\boldsymbol{\times}$ 36 layers</b></td><td></td><td class="r"><b>43,646,976 $\boldsymbol{\approx}$ 43.6M</b></td></tr>
+    </tbody>
+  </table>
+  </div>
+</figure>
+
+<figure id="tab3">
+  <div class="tcap">TABLE III. Trainable LoRA parameters across ranks, with all seven target matrices.</div>
+  <div class="tw">
+  <table>
+    <thead><tr><th class="r">Rank $r$</th><th class="r">Qwen3-8B trainable</th><th class="r">% of 8.19B</th><th class="r">Qwen3-32B trainable</th><th class="r">% of 32.76B</th></tr></thead>
+    <tbody>
+      <tr class="first"><td class="r">8</td><td class="r">21.8M</td><td class="r">0.27%</td><td class="r">67.1M</td><td class="r">0.20%</td></tr>
+      <tr><td class="r">16</td><td class="r">43.6M</td><td class="r">0.53%</td><td class="r">134.2M</td><td class="r">0.41%</td></tr>
+      <tr><td class="r">32</td><td class="r">87.3M</td><td class="r">1.07%</td><td class="r">268.4M</td><td class="r">0.82%</td></tr>
+      <tr><td class="r">64</td><td class="r">174.6M</td><td class="r">2.13%</td><td class="r">536.9M</td><td class="r">1.64%</td></tr>
+    </tbody>
+  </table>
+  </div>
+</figure>
+
+
+</main>
+</body>
+</html>

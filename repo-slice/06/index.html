@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Plain-text training without an output format">
+<meta name="idea" content="Train the facts of 02 as plain text, without question template and without EOS, like continued pretraining, so that no output format is learned. Variant 06b appends an EOS token to every text.">
+<meta name="upshot" content="Context use is kept (oracle coverage 0.61–0.69, base 0.82, 02 at most 0.43), but the facts barely come out when asked a question (closed-book coverage at most 0.21, 0 of 48 correct). The facts are stored, not retrievable by question.">
+<meta name="updated" content="2026-10-28">
+<title>Experiment 06: Plain-text training without an output format</title>
+<style>
+:root { color-scheme:light; --fg:#1f1f1f; --muted:#5f5f5f; --faint:#8a8a8a; --rule:#1f1f1f; --hair:#dcdcdc; --link:#1d4f91; --panel:#f7f7f5; }
+* { box-sizing:border-box; }
+body { margin:0; background:#fff; color:var(--fg); font:16px/1.6 Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif; }
+main { max-width:900px; margin:0 auto; padding:28px 16px 80px; }
+a { color:var(--link); }
+.crumb { font-size:14px; color:var(--muted); margin-bottom:18px; }
+h1 { font-weight:normal; font-size:32px; margin:0; letter-spacing:.01em; }
+.sub { color:var(--muted); font-style:italic; margin:2px 0 14px; }
+nav.toc { font-size:14px; border-top:1px solid var(--hair); border-bottom:1px solid var(--hair); padding:6px 0; margin-bottom:8px; }
+nav.toc a { margin-right:18px; text-decoration:none; } nav.toc a:hover { text-decoration:underline; }
+h2 { font-weight:normal; font-size:24px; margin:40px 0 6px; border-bottom:1.5px solid var(--rule); padding-bottom:3px; }
+h2 .num { color:var(--muted); margin-right:10px; }
+h3 { font-weight:normal; font-style:italic; font-size:18px; margin:22px 0 4px; }
+p { margin:6px 0 12px; max-width:80ch; }
+ul { max-width:80ch; padding-left:22px; } li { margin:3px 0; }
+.note { color:var(--muted); font-size:14px; }
+code { font-family:ui-monospace, Menlo, Consolas, monospace; font-size:13.5px; background:var(--panel); padding:0 3px; }
+dl.defs { display:grid; grid-template-columns:max-content 1fr; gap:4px 16px; font-size:15.5px; margin:8px 0 16px; }
+dl.defs dt { font-variant:small-caps; letter-spacing:.04em; color:var(--muted); }
+dl.defs dd { margin:0; }
+.tw { overflow-x:auto; margin:10px 0 6px; }
+table { border-collapse:collapse; width:100%; font-size:14.5px; border-top:1.5px solid var(--rule); border-bottom:1.5px solid var(--rule); }
+caption { caption-side:top; text-align:left; font-size:14px; color:var(--muted); padding-bottom:6px; }
+caption b { color:var(--fg); font-weight:normal; font-variant:small-caps; letter-spacing:.04em; }
+th { font-weight:normal; font-variant:small-caps; letter-spacing:.04em; color:var(--muted); text-align:left; padding:5px 10px; border-bottom:.75px solid var(--rule); white-space:nowrap; }
+td { padding:5px 10px; vertical-align:top; border-bottom:1px solid #f0f0f0; }
+tbody tr:last-child td { border-bottom:none; }
+td.n, th.n { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+tr.best td { font-weight:bold; }
+figure { margin:14px 0 18px; }
+figure img { max-width:100%; height:auto; border:1px solid var(--hair); }
+figcaption { font-size:14px; color:var(--muted); margin-top:4px; max-width:80ch; }
+.expl { font-size:15px; margin-top:4px; }
+.box { background:var(--panel); border-left:3px solid var(--rule); padding:8px 14px; margin:10px 0 14px; max-width:80ch; }
+.box p { margin:4px 0; }
+pre { background:var(--panel); padding:10px 12px; overflow-x:auto; font-size:13px; line-height:1.45; }
+pre code { background:none; padding:0; }
+.readme table { width:auto; }
+.readme td, .readme th { white-space:normal; }
+</style>
+</head>
+<body>
+<main>
+<div class="crumb"><a href="../../">Finetuning an OPALX expert</a> &rsaquo; Tests with OPALX repo slice &rsaquo; experiment 06</div>
+<h1>Experiment 06: Plain-text training without an output format</h1>
+<p class="sub">Tests with OPALX repo slice &middot; field-solver / space-charge slice, 39 topics, judged by Claude Opus 5.5 against required and forbidden claims (<a href="../README.html">README</a>, <a href="../sources.html">source files</a>)</p>
+<nav class="toc"><a href="#summary">Summary</a><a href="#setup">Setup</a><a href="#hypothesis">Hypothesis</a><a href="#results">Results</a><a href="#conclusion">Conclusion</a></nav>
+
+<h2 id="summary"><span class="num">1</span>Summary</h2>
+<dl class="defs"><dt>Idea</dt><dd>Train the facts of 02 as plain text, without question template and without EOS, like continued pretraining, so that no output format is learned. Variant 06b appends an EOS token to every text.</dd><dt>Upshot</dt><dd>Context use is kept (oracle coverage 0.61–0.69, base 0.82, 02 at most 0.43), but the facts barely come out when asked a question (closed-book coverage at most 0.21, 0 of 48 correct). The facts are stored, not retrievable by question.</dd></dl>
+
+<h2 id="setup"><span class="num">2</span>Setup</h2>
+<dl class="defs"><dt>Model</dt><dd><code>unsloth/Qwen3-8B-unsloth-bnb-4bit</code> (Qwen3-8B, 4-bit), LoRA r&nbsp;=&nbsp;32, &alpha;&nbsp;=&nbsp;32, dropout 0, on all seven projections (q, k, v, o, gate, up, down); AdamW 8-bit, lr 1e-4 linear, 6 warmup steps, batch 8, weight decay 0.001, max sequence length 2048, seed 3407, loss on every token</dd><dt>Configurations</dt><dd>Plain text: no Alpaca template, no EOS. <code>config.yaml</code> identical to 02: 8 epochs, 472 steps, checkpoint every 78 steps. Variant <code>eos</code> (06b): the same rows with the EOS token <code>&lt;|im_end|&gt;</code> appended, the only change. Evaluation is unchanged (Alpaca prompt, greedy, 768 tokens).</dd><dt>Training data</dt><dd>02 without the questions: per topic its <code>recall</code> and <code>mechanism</code> answers plus 7 recall and 3 mechanism rewordings (<code>experiments/06/formulations.py</code>, same facts reworded from the angles of 02's 12 questions, no new facts), each as one <code>{"text": ...}</code> row. 468 rows, no scenarios.</dd></dl>
+
+<h2 id="hypothesis"><span class="num">3</span>Hypothesis</h2>
+<p><a href="../05/">experiment 05</a> showed that 02 learned an output format (empty input &rarr; one memorized paragraph &rarr; EOS) and stopped using its input. Training the same facts without any format should keep the context-use bonus positive, like the base model's, instead of letting it drop to zero. Open: whether facts learned only from documents can be recalled by questions (Physics of LMs 3.1 suggests they may be stored but hard to extract).</p>
+
+<h2 id="results"><span class="num">4</span>Results</h2>
+<div class="tw"><table><caption><b>06 vs 06b (EOS)</b></caption><thead><tr><th class=""></th><th class="n">06</th><th class="n">06b</th></tr></thead><tbody>
+<tr><td class="">eval best coverage (checkpoint)</td><td class="n">0.21 (156)</td><td class="n">0.16 (234)</td></tr>
+<tr><td class="">eval fully correct</td><td class="n">0/48</td><td class="n">1/48</td></tr>
+<tr><td class="">eval material errors</td><td class="n">94–100%</td><td class="n">90–98%</td></tr>
+<tr><td class="">truncated answers</td><td class="n">all</td><td class="n">none</td></tr>
+<tr><td class="">demo best coverage</td><td class="n">0.17</td><td class="n">0.03</td></tr>
+<tr><td class="">oracle coverage (156 / 234 / 472)</td><td class="n">0.58 / 0.66 / 0.62</td><td class="n">0.44 / 0.47 / 0.24</td></tr>
+<tr><td class="">context-use bonus (range)</td><td class="n">+0.44 … +0.65</td><td class="n">+0.11 … +0.40</td></tr>
+</tbody></table></div><div class="tw"><table><caption><b>06: context use on the 9 composition questions</b></caption><thead><tr><th class="">checkpoint</th><th class="n">closed-book coverage</th><th class="n">oracle coverage</th><th class="n">context-use bonus</th></tr></thead><tbody>
+<tr><td class="">78</td><td class="n">0.04</td><td class="n">0.47</td><td class="n">+0.44</td></tr>
+<tr><td class="">156</td><td class="n">0.09</td><td class="n">0.58</td><td class="n">+0.49</td></tr>
+<tr><td class="">234</td><td class="n">0.07</td><td class="n">0.66</td><td class="n">+0.58</td></tr>
+<tr><td class="">312</td><td class="n">0.06</td><td class="n">0.67</td><td class="n">+0.60</td></tr>
+<tr><td class="">390</td><td class="n">0.04</td><td class="n">0.69</td><td class="n">+0.65</td></tr>
+<tr><td class="">468</td><td class="n">0.00</td><td class="n">0.61</td><td class="n">+0.61</td></tr>
+<tr><td class="">472</td><td class="n">0.00</td><td class="n">0.62</td><td class="n">+0.62</td></tr>
+</tbody></table></div><figure><img src="06_241337_context_use.png" alt="06: closed-book vs oracle claim coverage, and the bonus."><figcaption>06: closed-book vs oracle claim coverage, and the bonus.</figcaption></figure>
+<p class="expl">The bonus stays large at every checkpoint (+0.44 to +0.65): the adapter keeps reading its input. Closed book it covers almost nothing.</p><div class="tw"><table><caption><b>06b (EOS): context use on the 9 composition questions</b></caption><thead><tr><th class="">checkpoint</th><th class="n">closed-book coverage</th><th class="n">oracle coverage</th><th class="n">context-use bonus</th></tr></thead><tbody>
+<tr><td class="">78</td><td class="n">0.06</td><td class="n">0.18</td><td class="n">+0.11</td></tr>
+<tr><td class="">156</td><td class="n">0.07</td><td class="n">0.44</td><td class="n">+0.37</td></tr>
+<tr><td class="">234</td><td class="n">0.07</td><td class="n">0.47</td><td class="n">+0.40</td></tr>
+<tr><td class="">312</td><td class="n">0.04</td><td class="n">0.34</td><td class="n">+0.31</td></tr>
+<tr><td class="">390</td><td class="n">0.04</td><td class="n">0.31</td><td class="n">+0.27</td></tr>
+<tr><td class="">468</td><td class="n">0.00</td><td class="n">0.28</td><td class="n">+0.28</td></tr>
+<tr><td class="">472</td><td class="n">0.00</td><td class="n">0.24</td><td class="n">+0.24</td></tr>
+</tbody></table></div><figure><img src="06_eos-241421_context_use.png" alt="06b: closed-book vs oracle claim coverage, and the bonus."><figcaption>06b: closed-book vs oracle claim coverage, and the bonus.</figcaption></figure>
+<p class="expl">With EOS, oracle coverage peaks at checkpoint 234 and falls to 0.24 by 472: the same direction as 02, only slower.</p>
+
+<h2 id="conclusion"><span class="num">5</span>Conclusion</h2>
+<p>Plain-text training mostly keeps the ability to use context, but with a question prompt the memorized facts barely come out. Prompted with the beginning of a training text, the model completes it exactly and then rambles on, so the facts are stored. Missing EOS makes every 06 answer run to the token limit and inflates the material errors.</p><p>06b: EOS works as intended (no truncated answers, 60–80 words instead of about 650), but the scores are worse. Part of the drop is a length effect: claim coverage rewarded 650 words of rambling that hit claims by chance, so the real closed-book recall is about 0.1–0.16 in both runs. Material errors stay at about 90% even in short answers: under a question prompt the model writes invented OPALX-style text, although less than 1% of its sentences are verbatim training sentences. Context use is the real regression: EOS adds a learned paragraph &rarr; stop format, and the longer it trains, the more it answers from that pattern instead of the input.</p><p>Takeaway: EOS alone does not help retrieval and costs context use. For the next step (plain text plus some question–answer rows), choose early checkpoints (156–234), give some question rows a non-empty input, and watch the oracle bonus over all checkpoints.</p>
+<p class="note">Related: <a href="../05/">experiment 05</a> (the context-use test) &middot; <a href="../02/">experiment 02</a> (question–answer training) &middot; <a href="../07/">experiment 07</a> (continuing this adapter with chain of thought)</p>
+
+</main>
+</body>
+</html>
